@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://youtu-rag-docs.vercel.app/docs/en)
+[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://youtu-rag-docs.vercel.app/docs/zh)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
 
 [English](README.md) | 简体中文 

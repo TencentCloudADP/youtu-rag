@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](docs/)
+[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://youtu-rag-docs.vercel.app/docs/en)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
 
 English | [简体中文](README_ZH.md) 
@@ -513,9 +513,9 @@ For installation instructions, please refer to the official [MinIO repository](h
 
 | Model | HuggingFace | Deployment Method | Required |
 |:---|:---|:---|:---:|
-| [Youtu-Embedding ](https://github.com/TencentCloudADP/youtu-embedding) | [HuggingFace](https://huggingface.co/tencent/Youtu-Embedding) | [Deployment Docs](https://xxxxxx) | ✅ Required, or other Embedding API services |
-| [Youtu-Parsing](https://github.com/TencentCloudADP/youtu-parsing) | [HuggingFace](https://huggingface.co/tencent/Youtu-Parsing) | [Deployment Docs](https://xxxxxx) | ⭕ Optional |
-| [Youtu-HiChunk](https://github.com/TencentCloudADP/hichunk) | [HuggingFace](https://huggingface.co/tencent/Youtu-HiChunk) | [Deployment Docs](https://xxxx) | ⭕ Optional |
+| [Youtu-Embedding ](https://github.com/TencentCloudADP/youtu-embedding) | [HuggingFace](https://huggingface.co/tencent/Youtu-Embedding) | [Deployment Docs](https://youtu-rag-docs.vercel.app/docs/en/youtu-embedding/deploying-locally) | ✅ Required, or other Embedding API services |
+| [Youtu-Parsing](https://github.com/TencentCloudADP/youtu-parsing) | [HuggingFace](https://huggingface.co/tencent/Youtu-Parsing) | [Deployment Docs](https://youtu-rag-docs.vercel.app/docs/en/youtu-parsing/deploying-locally) | ⭕ Optional |
+| [Youtu-HiChunk](https://github.com/TencentCloudADP/hichunk) | [HuggingFace](https://huggingface.co/tencent/Youtu-HiChunk) | [Deployment Docs](https://youtu-rag-docs.vercel.app/docs/en/hichunk/deploying-locally) | ⭕ Optional |
 
 ### One-Click Installation of Youtu-RAG System
 

@@ -6,7 +6,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)]()
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](docs/)
+[![Documentation](https://img.shields.io/badge/docs-online-brightgreen.svg)](https://youtu-rag-docs.vercel.app/docs/en)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)]()
 
 [English](README.md) | 简体中文 
@@ -512,9 +512,9 @@ MinIO是一个高性能对象存储服务，用于存储上传的文档文件（
 
 | 模型 | HuggingFace | 部署方法 | 是否必选 |
 |:---|:---|:---|:---:|
-| [Youtu-Embedding ](https://github.com/TencentCloudADP/youtu-embedding) | [HuggingFace](https://huggingface.co/tencent/Youtu-Embedding) | [部署文档](https://xxxxxx) | ✅ 必选，或其他 Embedding API 服务 |
-| [Youtu-Parsing](https://github.com/TencentCloudADP/youtu-parsing) | [HuggingFace](https://huggingface.co/tencent/Youtu-Parsing) | [部署文档](https://xxxxxx) | ⭕ 可选 |
-| [Youtu-HiChunk](https://github.com/TencentCloudADP/hichunk) | [HuggingFace](https://huggingface.co/tencent/Youtu-HiChunk) | [部署文档](https://xxxx) | ⭕ 可选 |
+| [Youtu-Embedding ](https://github.com/TencentCloudADP/youtu-embedding) | [HuggingFace](https://huggingface.co/tencent/Youtu-Embedding) | [部署文档](https://youtu-rag-docs.vercel.app/docs/zh/youtu-embedding/deploying-locally) | ✅ 必选，或其他 Embedding API 服务 |
+| [Youtu-Parsing](https://github.com/TencentCloudADP/youtu-parsing) | [HuggingFace](https://huggingface.co/tencent/Youtu-Parsing) | [部署文档](https://youtu-rag-docs.vercel.app/docs/zh/youtu-parsing/deploying-locally) | ⭕ 可选 |
+| [Youtu-HiChunk](https://github.com/TencentCloudADP/hichunk) | [HuggingFace](https://huggingface.co/tencent/Youtu-HiChunk) | [部署文档](https://youtu-rag-docs.vercel.app/docs/zh/hichunk/deploying-locally) | ⭕ 可选 |
 
 
 ### 一键安装 Youtu-RAG 系统

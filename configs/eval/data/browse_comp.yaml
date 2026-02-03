@@ -1,0 +1,4 @@
+dataset: "BrowseComp"
+type: "single"
+question_field: "question"
+gt_field: "answer"

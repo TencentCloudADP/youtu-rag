@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  # - model: base
+  - /model/base@workforce_planner_model
+  - /model/base@workforce_assigner_model
+  - /model/base@workforce_answerer_model
+  - /agents/simple/search_agent@workforce_executor_agents.SearchAgent
+  - _self_
+
+type: workforce
+
+workforce_executor_config:
+  max_tries: 2  # max tries for task execution
+  return_summary: true  # whether to return summary
+
+workforce_executor_infos:
+  - name: SearchAgent
+    description: A web information search specialist that excels at finding relevant information through search tools (Google, Wikipedia, archived pages) and extracting webpage content for understanding. Focuses on information discovery and identifying authoritative sources.

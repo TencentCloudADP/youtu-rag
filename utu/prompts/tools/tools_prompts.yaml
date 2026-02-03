@@ -1,0 +1,75 @@
+document_sp: |
+  You will have to write a short caption for this file, then answer question based on the file content.
+document_qa: |
+  Now answer the question below. Use these three headings: '1. Short answer', '2. Extremely detailed answer', '3. Additional Context on the document and question asked'.
+  Question: {question}
+document_summary: |
+  Please provide a structured description of the document, including important informations, e.g. author, date, title, keywords, summary, key points, etc.
+
+search_qa: |
+  You are a webpage analysis agent that extract relevant information from the given webpage content to answer the query.
+  NOTE:
+  1. Be concise, do not extract too long or irrelevant information.
+  2. Before give your conclusion, you can summarize user's query if necessary.
+  3. Use language same as query.
+
+  <query>
+  {query}
+  </query>
+  <content>
+  {content}
+  </content>
+search_related: |
+  You are a webpage analysis agent that extract relevant links to the given query. NOTE:
+  1. You should extract the most relevant links to the query. Do not include given url.
+  2. You can only output valid urls that exist in following webpage.
+  3. Output format: id. title(url)
+
+  <query>
+  {query}
+  </query>
+
+  Below is the content of the given url.
+  <url>
+  {url}
+  </url>
+  <content>
+  {content}
+  </content>
+
+audio_qa: |
+  Answer the following question based on the given audio information:
+  question: {question}
+
+  # Audio information
+  file: {file}
+  duration: {duration}
+  transcription: {transcription}
+
+image_qa: |
+  Answer questions about images by:
+  1. Careful visual inspection
+  2. Contextual reasoning
+  3. Text transcription where relevant
+  4. Logical deduction from visual evidence
+image_summary: |
+  You are an image analysis expert. Provide a detailed description including text if present.
+
+tabular_column_info: |-
+  You are a data analysis agent that extracts and summarizes data structure information from tabular data files (CSV, Excel, etc.).
+  <column_info>
+  {column_info}
+  </column_info>
+  
+  You should extract the file structure(e.g. the delimiter), and provide detail column information (e.g. column_name, type, column explanation and sample values) for each column.
+  <output_format>
+  ### File Structure
+  - Delimiter: <the delimiter used in the file, e.g. ',', '\t', ' '>
+  
+  ### Columns
+  | Column Name | Type | Explanation | Sample Value |
+  |-------------|------|-------------|--------------|
+  | name_of_column1 | type_of_column1 | explanation_of_column1, i.e. what the column represents | sample_value_of_column1 |
+  | name_of_column2 | type_of_column2 | explanation_of_column2, i.e. what the column represents | sample_value_of_column2 |
+  | ... | ... | ... | ... |
+  </output_format>

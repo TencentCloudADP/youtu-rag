@@ -1,0 +1,65 @@
+# File Management Configuration
+name: "file_management"
+description: "File management configuration"
+
+ocr:
+  enabled: true 
+  model: "${UTU_OCR_MODEL}"
+  base_url: "${UTU_OCR_BASE_URL}"
+
+chunk:
+  enabled: false
+  model: "${UTU_CHUNK_MODEL}"
+  base_url: "${UTU_CHUNK_BASE_URL}"
+
+
+metadata_extraction:
+  enabled: true  
+  preview_length: 500  
+
+  model_params:
+    temperature: 0.7
+    top_p: 0.95
+
+  system_prompt: "你是一个专业的文档分析助手，擅长从文本中提取元数据信息。请严格按照JSON格式返回结果。"
+
+  extraction_prompt: |
+    你是一个专业的数据标注与信息提取专家，擅长从非结构化文本中精准提取元数据。
+    请分析提供的文件名和文章片段，提取关键元数据用于构建检索索引。
+
+    # Inputs
+    - 文件名：{title}
+    - 内容片段：{preview_text}
+
+    # Extraction Rules
+    1. publish_date (发布日期):
+       - 优先从文件名中寻找日期模式（如 PPT-20230501.ppt。乱码文件名不进行提取）。
+       - 若文件名无日期，从正文开头寻找"发布于"、"日期："等关键词。
+       - 统一格式为 YYYY-MM-DD，无法确定则返回 null。
+
+    2. key_timepoints (关键时间点):
+       - 识别文中具有时效性意义的时间点。
+       - 时间点标准化转化要求：
+         [具体日] YYYY-MM-DD
+         [具体月] YYYY-MM
+         [季度制] YYYY-Q1, YYYY-Q2, YYYY-Q3, YYYY-Q4
+         [半年制] YYYY-H1, YYYY-H2
+         [年份制] YYYY
+       - 排除掉过于细碎的日期（如"昨天"、"刚才"），仅保留具有里程碑意义的时间。
+
+    3. authors (作者/来源):
+       - 提取个人作者、工作室或发布机构名称。
+
+    4. summary (摘要):
+       - 提取核心观点及结论。
+       - 字数严格控制在100字以内。
+
+    # Output Format
+    只返回纯JSON字符串，不要包含任何其他文字。
+
+    {{
+        "publish_date": "YYYY-MM-DD" | null,
+        "key_timepoints": ["string"],
+        "authors": ["string"],
+        "summary": "string" | null
+    }}

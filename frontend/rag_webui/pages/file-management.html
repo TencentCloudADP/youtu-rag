@@ -1,0 +1,229 @@
+<!-- File Management Page -->
+<div class="page-header card" style="margin-bottom: 6px;">
+  <div class="header-left">
+    <h1 class="header-title" data-i18n="file_management_title">源文件资源</h1>
+  </div>
+
+    <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+        <img src="assets/images/add.svg" alt="Add" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+        <span data-i18n="upload_file">上传文件</span>
+    </button>
+</div>
+
+<!-- Search and Filter -->
+<div class="card" style="margin-bottom: 6px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div class="search-input" style="flex: 1; min-width: 300px; max-width: 400px;">
+      <input
+        type="text"
+        id="file-search"
+        class="input"
+        placeholder="Search by keyword in filename or metadata..."
+        data-i18n-placeholder="search_placeholder"
+        oninput="handleFileSearch(this.value)"
+      >
+      <i class="icon icon-search"></i>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button id="select-mode-btn" class="btn btn-secondary" onclick="toggleSelectMode()">
+        <img src="assets/images/select.svg" alt="Select" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+        <span data-i18n="batch_select">批量选择</span>
+      </button>
+      <button id="batch-delete-btn" class="btn" style="display: none; background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="batchDeleteFiles()">
+        <img src="assets/images/delete.svg" alt="Delete" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle; filter: invert(23%) sepia(89%) saturate(3815%) hue-rotate(346deg) brightness(88%) contrast(92%);">
+        <span id="batch-delete-text" data-i18n="delete_selected" data-i18n-options='{"count": 0}'>删除选中(0)</span>
+      </button>
+      <button class="btn btn-secondary" onclick="exportFilesToExcel()">
+        <img src="assets/images/export.svg" alt="Export" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+        <span data-i18n="export_metadata">导出Metadata</span>
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('metadata-import-input').click()">
+        <img src="assets/images/import.svg" alt="Import" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+        <span data-i18n="import_metadata">导入Metadata</span>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Upload Area (Hidden File Input) -->
+<input
+  type="file"
+  id="file-input"
+  multiple
+  accept=".pdf,.txt,.doc,.docx,.md,.xls,.xlsx,.png,.jpg,.jpeg,.bmp,.webp"
+  style="display: none;"
+  onchange="handleFileUpload(this.files)"
+>
+<input
+  type="file"
+  id="metadata-import-input"
+  accept=".xlsx,.xls"
+  style="display: none;"
+>
+
+<!-- Upload Progress Container -->
+<div id="progress-container" style="margin-top: 6px;">
+  <!-- Progress bars will be dynamically inserted here -->
+</div>
+
+<!-- File List Table -->
+<div class="table-container" style="margin-top: 6px;">
+  <table class="table">
+    <thead>
+      <tr>
+        <th id="checkbox-header" style="width: 50px; display: none;">
+          <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)" style="cursor: pointer;">
+        </th>
+        <th class="sortable" style="cursor: pointer; user-select: none;" onclick="toggleFileNameSort()">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span data-i18n="file_name">文件名</span>
+            <span id="filename-sort-indicator" style="font-size: 12px; color: var(--gray-6);">⇅</span>
+          </div>
+        </th>
+        <th class="sortable" style="width: 180px; cursor: pointer; user-select: none;" onclick="toggleUpdateTimeSort()">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span data-i18n="update_time">更新时间</span>
+            <span id="updatetime-sort-indicator" style="font-size: 12px; color: var(--gray-6);">⇅</span>
+          </div>
+        </th>
+        <th style="width: 180px;" data-i18n="actions">操作</th>
+      </tr>
+    </thead>
+    <tbody id="file-list-body">
+      <!-- File rows will be inserted here -->
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 48px;">
+          <div class="spinner spinner-large" style="margin: 0 auto;"></div>
+          <p style="margin-top: 16px; color: var(--gray-7);" data-i18n="loading_file_list">加载文件列表...</p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<div id="pagination-container" style="display: none; justify-content: space-between; align-items: center; margin-top: 12px; padding: 12px; background: var(--gray-1); border-radius: 8px; border: 1px solid var(--gray-3);">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <span style="font-size: 13px; color: var(--gray-7);" data-i18n="items_per_page">Items per page:</span>
+    <select id="page-size-select" onchange="changePageSize()" style="padding: 6px 10px; border: 1px solid var(--gray-4); border-radius: 4px; font-size: 13px; background: white; cursor: pointer;">
+      <option value="5">5</option>
+      <option value="10" selected>10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <span id="pagination-info" style="font-size: 13px; color: var(--gray-7); margin-left: 10px;"></span>
+  </div>
+  <div class="pagination" id="pagination">
+    <!-- Pagination buttons will be inserted here -->
+  </div>
+</div>
+
+<!-- Edit Metadata Modal -->
+<div id="edit-metadata-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) hideModal('edit-metadata-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="edit_metadata">编辑文件元数据</h2>
+      <span class="modal-close" onclick="hideModal('edit-metadata-modal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-i18n="metadata_filename">文件名</label>
+        <input type="text" id="metadata-filename" class="input" readonly>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="metadata_title">标题</label>
+        <input type="text" id="metadata-title" class="input" placeholder="输入文件标题" data-i18n-placeholder="enter_file_title">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="metadata_description">描述</label>
+        <textarea id="metadata-description" class="input" rows="4" placeholder="输入文件描述" data-i18n-placeholder="enter_file_description"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="metadata_tags">标签</label>
+        <input type="text" id="metadata-tags" class="input" placeholder="输入标签，用逗号分隔" data-i18n-placeholder="enter_tags_comma_separated">
+        <span class="form-help" data-i18n="metadata_tags_help">例如：技术文档, Python, 教程</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="hideModal('edit-metadata-modal')" data-i18n="cancel">取消</button>
+      <button class="btn btn-primary" onclick="saveMetadata()" data-i18n="save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Result Modal -->
+<div id="import-result-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) hideModal('import-result-modal')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="import_result_title">📥 Metadata Import Results</h2>
+      <span class="modal-close" onclick="hideModal('import-result-modal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div id="import-result-summary" style="margin-bottom: 20px;">
+        <!-- Summary will be inserted here -->
+      </div>
+      <div id="import-result-errors" style="max-height: 400px; overflow-y: auto;">
+        <!-- Error details will be inserted here -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="hideModal('import-result-modal'); loadFileList();" data-i18n="close_and_refresh">Close & Refresh</button>
+    </div>
+  </div>
+</div>
+
+<!-- File Details Modal -->
+<div id="file-details-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) hideModal('file-details-modal')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width: 700px;">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="file_details_title">📋 File Details</h2>
+      <span class="modal-close" onclick="hideModal('file-details-modal')">&times;</span>
+    </div>
+    <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+      <!-- Details will be inserted here -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="hideModal('file-details-modal')" data-i18n="close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) hideModal('delete-confirm-modal')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width: 700px;">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="confirm_delete_file">⚠️ 确认删除文件</h2>
+      <span class="modal-close" onclick="hideModal('delete-confirm-modal')">&times;</span>
+    </div>
+    <div class="modal-body" id="delete-confirm-body">
+      <!-- Dynamic content will be inserted here -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="hideModal('delete-confirm-modal')" data-i18n="cancel">取消</button>
+      <button class="btn" id="delete-confirm-btn" onclick="confirmFileDeletion()" style="background-color: #dc2626; color: white; border: 1px solid #b91c1c;" data-i18n="delete">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- File Content Viewer Sidebar -->
+<div id="file-content-sidebar" class="file-content-sidebar" style="display: none;">
+  <div class="sidebar-header">
+    <h3 class="sidebar-title" id="sidebar-filename" data-i18n="file_content">文件内容</h3>
+    <button class="sidebar-close" onclick="closeFileContentSidebar()">&times;</button>
+  </div>
+  <div class="sidebar-body">
+    <div id="sidebar-content-loading" style="text-align: center; padding: 48px;">
+      <div class="spinner spinner-large" style="margin: 0 auto;"></div>
+      <p style="margin-top: 16px; color: var(--gray-7);" data-i18n="loading_file_content">加载文件内容...</p>
+    </div>
+    <div id="sidebar-content-display" style="display: none;">
+      <!-- File content will be displayed here -->
+    </div>
+  </div>
+</div>
+<div id="sidebar-overlay" class="sidebar-overlay" style="display: none;" onclick="closeFileContentSidebar()"></div>

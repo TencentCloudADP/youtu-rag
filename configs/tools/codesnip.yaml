@@ -1,0 +1,5 @@
+name: codesnip
+mode: builtin
+activated_tools: null
+config:
+    server_url: ${oc.env:CODESNIP_SERVER_URL}

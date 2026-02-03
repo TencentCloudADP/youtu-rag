@@ -1,0 +1,4 @@
+type: custom
+
+config:
+  data_sample_rows: 150

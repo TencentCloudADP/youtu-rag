@@ -1,0 +1,11 @@
+model_provider:
+  type: ${oc.env:UTU_LLM_TYPE}
+  model: ${oc.env:UTU_LLM_MODEL}
+
+  # NOTE: we should set these envs in .env
+  # base_url: ${oc.env:UTU_LLM_BASE_URL}
+  # api_key: ${oc.env:UTU_LLM_API_KEY}
+
+# model_settings:
+#   temperature: 0.3
+#   top_p: 0.95

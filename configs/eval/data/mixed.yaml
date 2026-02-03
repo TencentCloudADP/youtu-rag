@@ -1,0 +1,4 @@
+dataset: "data/utu_test/agent_test_webwalker.jsonl"
+type: "mixed"
+question_field: "question"
+gt_field: "answer"

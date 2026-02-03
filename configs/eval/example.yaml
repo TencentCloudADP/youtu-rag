@@ -1,0 +1,19 @@
+# @package _global_
+defaults:
+  - /agents/exp/v03@agent
+  - /eval/data/mixed@data
+  - _self_
+
+exp_id: "example_expid"
+
+concurrency: 16
+
+judge_model:
+  model_provider:
+    type: ${oc.env:JUDGE_LLM_TYPE}
+    model: ${oc.env:JUDGE_LLM_MODEL}
+    base_url: ${oc.env:JUDGE_LLM_BASE_URL}
+    api_key: ${oc.env:JUDGE_LLM_API_KEY}
+  model_params:
+    temperature: 0.5
+judge_concurrency: 16

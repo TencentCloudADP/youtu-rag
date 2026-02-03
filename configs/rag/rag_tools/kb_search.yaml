@@ -1,0 +1,31 @@
+name: kb_search
+mode: builtin
+activated_tools: null
+
+config:
+  # Embedding configuration
+  #
+  # Option 1: Local Service (No API key required)
+  # For self-hosted embedding services (e.g., youtu-embedding-2B)
+  embedding:
+    backend: service
+    base_url: ${oc.env:UTU_EMBEDDING_URL}
+
+  # Option 2: OpenAI API Standard (API key required)
+  # For OpenAI or OpenAI-compatible embedding APIs
+  # embedding:
+  #   backend: openai
+  #   model: ${oc.env:UTU_EMBEDDING_MODEL}
+  #   api_key: ${oc.env:UTU_API_KEY}
+  #   base_url: ${oc.env:UTU_EMBEDDING_URL}
+
+  # Reranker configuration
+  reranker:
+    backend: jina
+    threshold: 0.5
+
+  # Vector store configuration
+  vector_store:
+    backend: chroma
+    persist_directory: ${oc.env:VECTOR_STORE_PATH}
+    distance_metric: cosine

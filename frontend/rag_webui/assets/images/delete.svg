@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="17px" height="16px" viewBox="0 0 17 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>删除-16</title>
+    <g id="删除-16" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(0.000000, 0.000000)">
+        <rect id="矩形" x="0" y="0" width="16" height="16"></rect>
+        <path d="M16,3 L16,5 L14,5 L14,16 L2,16 L2,5 L0,5 L0,3 L16,3 Z M12,5 L4,5 L4,14 L12,14 L12,5 Z M7,6 L7,13 L5,13 L5,6 L7,6 Z M11,6 L11,13 L9,13 L9,6 L11,6 Z M11,0 L11,2 L5,2 L5,0 L11,0 Z" id="形状结合" fill="#0052d9"></path>
+    </g>
+</svg>

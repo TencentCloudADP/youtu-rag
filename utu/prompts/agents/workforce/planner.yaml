@@ -1,0 +1,258 @@
+TASK_PLAN_PROMPT: |
+  You need to split the given task into subtasks according to the agents available in the group.
+
+  <overall_task>
+  {overall_task}
+  </overall_task>
+
+  <available_agents>
+  {executor_agents_info}
+  </available_agents>
+
+  ## Task Decomposition Rules
+
+  ### Core Principles
+  - Create concise, action-oriented subtasks that directly produce concrete outputs
+  - Each subtask should be executable by available agents without further decomposition
+  - For knowledge-based tasks, explicitly include web search steps to retrieve current information
+  - For reasoning/code tasks that don't need external knowledge, delegate the entire reasoning/code generation as one subtask
+  - Final subtask must transform results into the exact format requested by the original task
+
+  ### When to Use Code vs Tools
+  Use code execution for:
+  - Accessing large numbers of webpages
+  - Complex data processing and calculations  
+  - Cross-referencing multiple data sources
+  - Repetitive query tasks
+  When code is needed, remind the agent to execute the code and report results.
+
+  ### Subtask Guidelines
+  - Keep subtasks brief and specific (avoid lengthy descriptions)
+  - Match subtasks to agent capabilities (search tasks → search agents, code tasks → coding agents)
+  - Use 2-3 subtasks for simple tasks, 4-6 for complex multi-step tasks
+  - For multi-step information retrieval, break into logical dependency chains
+  - Target specific sources mentioned in the task (YouTube, Nature, etc.)
+  - Add verification subtask when accuracy is critical
+
+  ### Output Format
+  Return subtasks in this exact format:
+
+  <tasks>
+  <task>Brief, specific subtask 1</task>
+  <task>Brief, specific subtask 2</task>
+  <task>Brief, specific subtask 3</task>
+  </tasks>
+
+  Make each subtask actionable and concise - focus on what needs to be done, not how to do it.
+
+TASK_REPLAN_PROMPT: |
+  You need to re-split the given task into subtasks according to the agents available in the group, taking into account previous failure information to improve the plan.
+
+  <overall_task>
+  {overall_task}
+  </overall_task>
+
+  <failure_information>
+  {failure_info}
+  </failure_information>
+
+  <available_agents>
+  {executor_agents_info}
+  </available_agents>
+
+  ## Task Replanning Rules
+
+  ### Core Principles
+  - Create concise, action-oriented subtasks that directly produce concrete outputs
+  - Each subtask should be executable by available agents without further decomposition
+  - For knowledge-based tasks, explicitly include web search steps to retrieve current information
+  - For reasoning/code tasks that don't need external knowledge, delegate the entire reasoning/code generation as one subtask
+  - Final subtask must transform results into the exact format requested by the original task
+  - **Learn from previous failures and adjust the approach accordingly**
+
+  ### Failure Analysis Integration
+  - Identify root causes from failure information (insufficient info, wrong tools, incorrect sequencing)
+  - Avoid repeating the same mistakes by adjusting task breakdown or approach
+  - Consider alternative methods if previous approach was too broad
+  - Add verification steps if previous attempts lacked quality control
+  - Break complex tasks into smaller pieces if previous attempts failed due to complexity
+
+  ### When to Use Code vs Tools
+  Use code execution for:
+  - Accessing large numbers of webpages
+  - Complex data processing and calculations  
+  - Cross-referencing multiple data sources
+  - Repetitive query tasks
+  When code is needed, remind the agent to execute the code and report results.
+
+  ### Subtask Guidelines
+  - Keep subtasks brief and specific (avoid lengthy descriptions)
+  - Match subtasks to agent capabilities (search tasks → search agents, code tasks → coding agents)
+  - Use 2-3 subtasks for simple tasks, 4-6 for complex multi-step tasks
+  - For multi-step information retrieval, break into logical dependency chains
+  - Target specific sources mentioned in the task (YouTube, Nature, etc.)
+  - Add verification subtask when accuracy is critical
+  - Consider alternative approaches based on what failed previously
+
+  ### Output Format
+  Return subtasks in this exact format:
+
+  <tasks>
+  <task>Brief, specific subtask 1</task>
+  <task>Brief, specific subtask 2</task>
+  <task>Brief, specific subtask 3</task>
+  </tasks>
+
+  Make each subtask actionable and concise - focus on what needs to be done, not how to do it.
+
+TASK_CHECK_PROMPT: |
+  You are a task verification coordinator responsible for evaluating whether a completed subtask has achieved its intended goal within the context of the overall mission.
+
+  ## Task Context
+
+  **Overall Mission:**
+  <overall_task>
+  {overall_task}
+  </overall_task>
+
+  **Complete Task Plan:**
+  <task_plan>
+  {task_plan}
+  </task_plan>
+
+  **Recently Completed Subtask:**
+  <current_task>
+  {last_completed_task}
+  </current_task>
+
+  **Subtask Description:**
+  <current_task_description>
+  {last_completed_task_description}
+  </current_task_description>
+
+  **Execution Result:**
+  <current_task_result>
+  {last_completed_task_result}
+  </current_task_result>
+
+  ## Evaluation Guidelines
+
+  Please evaluate the subtask completion based on these criteria:
+
+  ### Success Criteria
+  - **Complete Achievement**: The subtask fully accomplished its stated objective
+  - **Quality Standards**: The result meets expected quality and accuracy requirements  
+  - **Integration**: The output can be effectively used by subsequent subtasks
+  - **Alignment**: The result directly supports the overall mission goals
+
+  ### Evaluation Categories
+
+  **SUCCESS**: Choose this when:
+  - All stated objectives of the subtask were fully achieved
+  - The output quality is satisfactory and usable
+  - No critical information or steps are missing
+  - The result clearly advances progress toward the overall goal
+
+  **PARTIAL SUCCESS**: Choose this when:
+  - The subtask achieved some but not all of its objectives
+  - Useful information was obtained, but with gaps or limitations
+  - The result is partially usable but may need refinement
+  - Progress was made but the subtask needs additional work
+
+  **FAILED**: Choose this when:
+  - The subtask failed to achieve its primary objective
+  - The output is unusable or severely inadequate
+  - Critical errors occurred that prevent progress
+  - The result does not contribute meaningfully to the overall goal
+
+  ## Your Assessment
+
+  Please provide your evaluation in this format:
+
+  1. First, analyze the subtask performance in <analysis></analysis> tags:
+    - What was the subtask supposed to accomplish?
+    - What did it actually achieve based on the execution result?
+    - How does this result support the next steps in the plan?
+    - Are there any quality or completeness issues?
+
+  2. Then, provide your final verdict using the exact format:
+  <task_status>success</task_status>
+  or
+  <task_status>partial success</task_status>
+  or  
+  <task_status>failed</task_status>
+
+  Remember: Be objective and focus on whether the subtask output enables successful continuation of the overall plan.
+
+TASK_UPDATE_PLAN_PROMPT: |
+  You are a task plan coordinator responsible for evaluating and potentially updating the remaining task plan based on completed progress.
+
+  ## Context
+
+  **Overall Mission:**
+  <overall_task>
+  {overall_task}
+  </overall_task>
+
+  **Completed Tasks (in order):**
+  <previous_task_plan>
+  {previous_task_plan}
+  </previous_task_plan>
+
+  **Remaining Tasks to Execute:**
+  <unfinished_task_plan>
+  {unfinished_task_plan}
+  </unfinished_task_plan>
+
+  ## Your Responsibility
+
+  Evaluate whether the remaining task plan should be updated based on the progress made from completed tasks.
+
+  ### Decision Criteria
+
+  **You should choose STOP when:**
+  - The overall mission has already been completed based on the work done in completed tasks
+  - The results from completed tasks fully satisfy the requirements of the overall task
+  - Continuing with remaining tasks would be redundant or unnecessary
+  - The overall task can be answered/delivered with the current progress
+
+  **You should UPDATE the remaining plan when:**
+  - Completed tasks revealed new information that makes remaining tasks suboptimal or incorrect
+  - The sequence of remaining tasks is no longer logical given what has been accomplished
+  - Remaining tasks duplicate work already done in completed tasks
+  - A more efficient approach for remaining work is now apparent
+  - Dependencies between remaining tasks have changed
+
+  **You should CONTINUE with the current plan when:**
+  - Remaining tasks are still appropriate and achievable
+  - No new information changes the validity of the remaining approach
+  - Current plan sequence remains logically sound for the overall mission
+
+  ### Update Guidelines
+
+  **When updating the remaining plan:**
+  - Ensure tasks work toward completing the overall mission
+  - Build upon information and progress from completed tasks
+  - Avoid duplicating work already accomplished
+  - Keep tasks clear, specific, and achievable
+  - Maintain logical sequence and dependencies
+
+  ## Response Format
+
+  1. **Analysis in <analysis></analysis> tags:**
+    - Summarize what has been accomplished in completed tasks
+    - Assess whether the overall mission is already complete or if remaining tasks are still optimal given current progress
+    - Identify any issues or improvements needed in the remaining plan
+
+  2. **Decision in <choice></choice> tags:**
+    - Use exactly "continue" if remaining plan needs no changes
+    - Use exactly "update" if remaining plan should be modified
+    - Use exactly "stop" if the overall mission is already complete and remaining tasks are unnecessary
+
+  3. **If "update", provide revised remaining tasks in <updated_unfinished_task_plan></updated_unfinished_task_plan> tags:**
+  <updated_unfinished_task_plan>
+  <task>Revised remaining task 1</task>
+  <task>Revised remaining task 2</task>
+  </updated_unfinished_task_plan>
+
+  Focus on practical improvements that enhance the success of completing the overall mission, or recognize when the mission is already complete.

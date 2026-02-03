@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR Viewer</title>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+
+  <style>
+    /* OCR Viewer specific styles */
+    .highlight-box {
+      position: absolute;
+      border: 2px solid #007bff;
+      background-color: rgba(0, 123, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 5;
+    }
+    .highlight-box.active {
+      border-color: #dc3545;
+      background-color: rgba(220, 53, 69, 0.2);
+      z-index: 10;
+    }
+    .markdown-content {
+      max-height: calc(100vh - 250px);
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .error {
+      padding: 16px;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      border-radius: 4px;
+      color: #721c24;
+    }
+    .status-indicator {
+      margin-left: 10px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 12px;
+      background-color: #28a745;
+      color: white;
+    }
+    .status-indicator.unsaved {
+      font-weight: 700;
+      background-color: #ffc107;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body style="background: var(--gray-2); padding: 6px;">
+  <!-- OCR Viewer Page -->
+  <div class="page-header card" style="margin-bottom: 6px; padding: 10px 20px; min-height: 48px;">
+    <div class="header-left">
+      <h1 class="header-title" style="font-size: 18px; font-weight: 700;">OCR Viewer</h1>
+      <span id="filename" style="font-weight: 600; color: #000;">-</span>
+      <span id="statusIndicator" class="status-indicator">Saved</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" onclick="closeWindow()" style="padding: 8px 16px;">
+        <span data-i18n="close">Close</span>
+      </button>
+      <button class="btn btn-success" id="saveBtn" onclick="saveChanges()" disabled style="font-weight: 700;">Save Changes</button>
+    </div>
+  </div>
+
+  <div class="ocr-container" style="display: flex; height: calc(100vh - 80px); gap: 6px;">
+    <!-- Image Panel -->
+    <div class="card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+      <div id="imageLoading" style="flex: 1; display: flex; align-items: center; justify-content: center;">
+        <div class="spinner"></div>
+        <span style="margin-left: 12px; color: var(--gray-6);">Loading OCR results...</span>
+      </div>
+      <div id="imageError" class="error" style="display: none; margin: 16px;"></div>
+      <div id="imageContainer" style="display: none; flex: 1; overflow: auto; position: relative; padding: 10px 20px 20px 20px; box-sizing: border-box;">
+        <div style="width: 100%; height: 100%; display: flex; align-items: flex-start; justify-content: center; position: relative;">
+          <div class="view-controls" style="position: absolute; top: 2px; right: 10px; display: flex; gap: 5px; z-index: 10;">
+            <button class="btn btn-small btn-secondary" onclick="refreshLayout()" title="Refresh layout boxes">⟲</button>
+          </div>
+          <img id="layoutImage" src="" alt="OCR Layout" style="max-width: 100%; max-height: calc(100vh - 160px); width: auto; height: auto; object-fit: contain; display: block; cursor: crosshair; user-select: none;">
+        </div>
+        <!-- Page controls for multi-page documents -->
+        <div id="pageControls" style="display: none; position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: white; padding: 8px 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); gap: 15px; align-items: center; z-index: 100;">
+          <button class="btn btn-small" onclick="previousPage()" id="prevPageBtn">◀ Previous</button>
+          <span id="pageInfo" style="font-size: 14px; min-width: 100px; text-align: center;">Page 1 / 1</span>
+          <button class="btn btn-small" onclick="nextPage()" id="nextPageBtn">Next ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Panel -->
+    <div class="card" style="width: 500px; display: flex; flex-direction: column;">
+      <div class="panel-header" style="padding: 12px 16px; border-bottom: 1px solid var(--gray-3); background: var(--gray-1);">
+        <h3 id="blockTitle" style="margin: 0; font-size: 16px;">Block Details</h3>
+        <span id="blockType" class="badge" style="background: var(--gray-3); color: var(--gray-8);"></span>
+      </div>
+      <div style="flex: 1; overflow-y: auto; padding: 16px;">
+        <!-- Markdown View -->
+        <div id="markdownView">
+          <div id="markdownContent" class="markdown-content" style="padding: 12px; background: var(--gray-1); border: 1px solid var(--gray-3); border-radius: 4px; font-size: 14px; line-height: 1.6; min-height: 200px;">Loading...</div>
+        </div>
+        <!-- Content Editor -->
+        <div id="contentEditor" style="display: none; flex-direction: column; height: 100%;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Content:</label>
+          <textarea id="textContent" class="input" style="flex: 1; min-height: 200px; resize: none;" placeholder="Edit text content..."></textarea>
+          <div class="bbox-info" style="margin-top: 12px; padding: 10px; background: var(--gray-1); border-radius: 4px; font-size: 12px; color: var(--gray-6); flex-shrink: 0;">
+            <strong>Position:</strong> <span id="bboxInfo">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="assets/js/utils.js"></script>
+
+  <script>
+    // OCR Viewer Component
+    let ocrData = null;
+    let currentBlockIndex = null;
+    let hasUnsavedChanges = false;
+
+    // Multi-page support
+    let isMultiPage = false;
+    let currentPageNum = 1;
+    let totalPages = 1;
+    let allPagesData = [];
+
+    // Get API base URL
+    // Since frontend and backend run on the same port (configured in .env SERVER_PORT),
+    // we use relative paths (empty string) to access the API
+    function getApiBase() {
+      return '';
+    }
+
+    // Get filename from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const ocrFilename = urlParams.get('file');
+
+    if (!ocrFilename) {
+      document.getElementById('imageError').textContent = 'No filename specified';
+      document.getElementById('imageError').style.display = 'block';
+      document.getElementById('imageLoading').style.display = 'none';
+    } else {
+      document.getElementById('filename').textContent = ` - ${ocrFilename}`;
+      document.title = `OCR Viewer - ${ocrFilename}`;
+      loadOCRData();
+    }
+
+    async function loadOCRData() {
+      try {
+        const API_BASE = getApiBase();
+        const response = await fetch(`${API_BASE}/api/files/ocr-results/${encodeURIComponent(ocrFilename)}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to load OCR results: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('OCR Data loaded:', data);
+
+        // Check if multi-page document
+        isMultiPage = data.is_multi_page || false;
+
+        if (isMultiPage) {
+          // Multi-page document (PDF)
+          allPagesData = data.pages;
+          totalPages = data.total_pages;
+          currentPageNum = 1;
+
+          // Show page controls
+          document.getElementById('pageControls').style.display = 'flex';
+
+          // Load first page
+          loadPage(1);
+        } else {
+          // Single-page document (image)
+          ocrData = data;
+
+          // Hide page controls
+          document.getElementById('pageControls').style.display = 'none';
+
+          // Load image
+          const img = document.getElementById('layoutImage');
+          img.src = `${API_BASE}${ocrData.layout_image_url}`;
+          img.onload = () => {
+            document.getElementById('imageLoading').style.display = 'none';
+            document.getElementById('imageContainer').style.display = 'flex';
+            renderClickableAreas();
+            showMarkdownView();
+          };
+
+          img.onerror = () => {
+            throw new Error('Failed to load layout image');
+          };
+        }
+
+      } catch (error) {
+        console.error('Load error:', error);
+        document.getElementById('imageError').textContent = error.message;
+        document.getElementById('imageError').style.display = 'block';
+        document.getElementById('imageLoading').style.display = 'none';
+      }
+    }
+
+    function loadPage(pageNum) {
+      if (pageNum < 1 || pageNum > totalPages) {
+        console.error('Invalid page number:', pageNum);
+        return;
+      }
+
+      currentPageNum = pageNum;
+      const pageData = allPagesData[pageNum - 1];  // 0-indexed array
+      const API_BASE = getApiBase();
+
+      // Update ocrData to current page
+      ocrData = {
+        filename: ocrFilename,
+        markdown_text: pageData.markdown_text,
+        structured_data: pageData.structured_data,
+        layout_image_url: pageData.layout_image_url,
+        page_num: pageData.page_num
+      };
+
+      // Update page info
+      document.getElementById('pageInfo').textContent = `Page ${currentPageNum} / ${totalPages}`;
+
+      // Update button states
+      document.getElementById('prevPageBtn').disabled = (currentPageNum === 1);
+      document.getElementById('nextPageBtn').disabled = (currentPageNum === totalPages);
+
+      // Load layout image for this page
+      const img = document.getElementById('layoutImage');
+      img.src = `${API_BASE}${pageData.layout_image_url}`;
+      img.onload = () => {
+        document.getElementById('imageLoading').style.display = 'none';
+        document.getElementById('imageContainer').style.display = 'flex';
+        renderClickableAreas();
+        showMarkdownView();
+      };
+
+      img.onerror = () => {
+        console.error('Failed to load page image');
+      };
+    }
+
+    function previousPage() {
+      if (currentPageNum > 1) {
+        loadPage(currentPageNum - 1);
+      }
+    }
+
+    function nextPage() {
+      if (currentPageNum < totalPages) {
+        loadPage(currentPageNum + 1);
+      }
+    }
+
+    function renderClickableAreas() {
+      // Remove old highlight boxes
+      const oldBoxes = document.querySelectorAll('.highlight-box');
+      oldBoxes.forEach(box => box.remove());
+
+      const img = document.getElementById('layoutImage');
+      if (!ocrData || !ocrData.structured_data) return;
+
+      // Ensure image is fully loaded
+      if (!img.complete || img.naturalWidth === 0) {
+        console.log('Image not fully loaded, waiting...');
+        img.onload = () => renderClickableAreas();
+        return;
+      }
+
+      // Create or get image wrapper
+      let wrapper = img.parentElement;
+      if (!wrapper.classList.contains('img-wrapper')) {
+        wrapper = document.createElement('div');
+        wrapper.className = 'img-wrapper';
+        wrapper.style.position = 'relative';
+        wrapper.style.display = 'inline-block';
+        img.parentElement.insertBefore(wrapper, img);
+        wrapper.appendChild(img);
+
+        // Add image click event: show markdown when clicking non-box area
+        img.onclick = (e) => {
+          if (e.target === img) {
+            showMarkdownView();
+          }
+        };
+      }
+
+      // Calculate image scale
+      const scaleX = img.naturalWidth / img.clientWidth;
+      const scaleY = img.naturalHeight / img.clientHeight;
+
+      console.log(`Image dimensions - Natural: ${img.naturalWidth}x${img.naturalHeight}, Display: ${img.clientWidth}x${img.clientHeight}`);
+
+      ocrData.structured_data.forEach((block, index) => {
+        if (!block.bbox || block.bbox.length < 8) return;
+
+        // bbox format: [x1, y1, x2, y2, x3, y3, x4, y4] - four corner points
+        const [x1, y1, x2, y2, x3, y3, x4, y4] = block.bbox;
+
+        // Calculate bounding box
+        const minX = Math.min(x1, x2, x3, x4);
+        const minY = Math.min(y1, y2, y3, y4);
+        const maxX = Math.max(x1, x2, x3, x4);
+        const maxY = Math.max(y1, y2, y3, y4);
+
+        const box = document.createElement('div');
+        box.className = 'highlight-box';
+        box.style.cssText = `
+          position: absolute;
+          border: 2px solid #007bff;
+          background-color: rgba(0, 123, 255, 0.1);
+          cursor: pointer;
+          transition: all 0.2s;
+          left: ${(minX / scaleX)}px;
+          top: ${(minY / scaleY)}px;
+          width: ${((maxX - minX) / scaleX)}px;
+          height: ${((maxY - minY) / scaleY)}px;
+        `;
+        box.dataset.blockIndex = index;
+
+        box.onclick = (e) => {
+          e.stopPropagation();
+          selectBlock(index);
+        };
+
+        wrapper.appendChild(box);
+      });
+    }
+
+    function refreshLayout() {
+      console.log('Refreshing layout boxes...');
+      renderClickableAreas();
+    }
+
+    function selectBlock(index) {
+      currentBlockIndex = index;
+      const block = ocrData.structured_data[index];
+
+      // Update highlight
+      document.querySelectorAll('.highlight-box').forEach((box, i) => {
+        box.classList.toggle('active', i === index);
+        if (i === index) {
+          box.style.borderColor = '#dc3545';
+          box.style.backgroundColor = 'rgba(220, 53, 69, 0.2)';
+        } else {
+          box.style.borderColor = '#007bff';
+          box.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+        }
+      });
+
+      // Switch to content editor view
+      document.getElementById('markdownView').style.display = 'none';
+      document.getElementById('contentEditor').style.display = 'flex';
+
+      // Fill content
+      document.getElementById('blockTitle').textContent = `Block #${index + 1}`;
+      document.getElementById('blockType').textContent = block.type || 'Text';
+      document.getElementById('textContent').value = block.content || '';
+      document.getElementById('bboxInfo').textContent = `[${block.bbox.join(', ')}]`;
+
+      // Add content change listener
+      const textarea = document.getElementById('textContent');
+      textarea.oninput = () => {
+        markAsUnsaved();
+      };
+    }
+
+    function showMarkdownView() {
+      // Clear current selected block
+      currentBlockIndex = null;
+      document.querySelectorAll('.highlight-box').forEach(box => {
+        box.classList.remove('active');
+        box.style.borderColor = '#007bff';
+        box.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+      });
+
+      // Switch to markdown view
+      document.getElementById('contentEditor').style.display = 'none';
+      document.getElementById('markdownView').style.display = 'block';
+
+      // Update panel title
+      document.getElementById('blockTitle').textContent = 'Markdown Preview';
+      document.getElementById('blockType').textContent = 'Read-Only';
+
+      // Display markdown content
+      if (ocrData && ocrData.markdown_text) {
+        document.getElementById('markdownContent').textContent = ocrData.markdown_text;
+      } else {
+        document.getElementById('markdownContent').textContent = 'No markdown content available';
+      }
+    }
+
+    function markAsUnsaved() {
+      hasUnsavedChanges = true;
+      document.getElementById('saveBtn').disabled = false;
+      document.getElementById('statusIndicator').textContent = 'Unsaved';
+      document.getElementById('statusIndicator').classList.add('unsaved');
+    }
+
+    function markAsSaved() {
+      hasUnsavedChanges = false;
+      document.getElementById('saveBtn').disabled = true;
+      document.getElementById('statusIndicator').textContent = 'Saved';
+      document.getElementById('statusIndicator').classList.remove('unsaved');
+    }
+
+    async function saveChanges() {
+      if (currentBlockIndex === null) return;
+
+      try {
+        // Update current block content
+        const newContent = document.getElementById('textContent').value;
+        ocrData.structured_data[currentBlockIndex].content = newContent;
+
+        // Regenerate markdown text
+        const markdownText = generateMarkdown(ocrData.structured_data);
+
+        // Prepare save payload
+        const savePayload = {
+          markdown_text: markdownText,
+          structured_data: ocrData.structured_data
+        };
+
+        // For multi-page documents, include page number
+        if (isMultiPage) {
+          savePayload.page_num = currentPageNum;
+        }
+
+        // Save to server
+        const API_BASE = getApiBase();
+        const response = await fetch(`${API_BASE}/api/files/ocr-results/${encodeURIComponent(ocrFilename)}/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(savePayload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Save failed: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('Save result:', result);
+
+        // Update local markdown text cache
+        ocrData.markdown_text = markdownText;
+
+        // If multi-page, also update the page data in allPagesData
+        if (isMultiPage) {
+          allPagesData[currentPageNum - 1].markdown_text = markdownText;
+          allPagesData[currentPageNum - 1].structured_data = ocrData.structured_data;
+        }
+
+        showToast('Changes saved successfully!', 'success');
+        markAsSaved();
+
+      } catch (error) {
+        console.error('Save error:', error);
+        showToast(`Failed to save: ${error.message}`, 'error');
+      }
+    }
+
+    function generateMarkdown(structuredData) {
+      return structuredData.map(block => {
+        if (!block.content) return '';
+        return block.content;
+      }).filter(line => line.trim()).join('\n\n');
+    }
+
+    // Close window
+    function closeWindow() {
+      if (hasUnsavedChanges) {
+        if (!confirm('You have unsaved changes. Are you sure you want to leave?')) {
+          return;
+        }
+      }
+      window.close();
+    }
+
+    // Warn user about unsaved changes
+    window.addEventListener('beforeunload', (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+
+    // Listen for window resize with debounce
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      if (ocrData) {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          console.log('Window resized, refreshing layout...');
+          renderClickableAreas();
+        }, 200);
+      }
+    });
+  </script>
+</body>
+</html>

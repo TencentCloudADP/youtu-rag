@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q&A详情 - RAG System</title>
+  <link rel="stylesheet" href="/assets/css/reset.css">
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+</head>
+<body>
+  <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+    <!-- Q&A Detail Page -->
+    <div class="page-header card" style="margin-bottom: 6px;">
+      <div style="display: flex; align-items: center; gap: 16px; width: 100%;">
+        <button class="btn btn-secondary" onclick="window.close()" style="padding: 8px 16px;">
+          <span data-i18n="close">关闭</span>
+        </button>
+        <div class="header-left" style="flex: 1;">
+          <h1 class="header-title" id="qa-detail-filename" data-i18n="qa_detail_title">Q&A详情</h1>
+          <p id="qa-detail-info" style="margin: 8px 0 0 0; color: var(--gray-7); font-size: 14px;"></p>
+        </div>
+        <!-- Language Toggle Button -->
+        <button id="lang-toggle" style="
+          background: transparent;
+          border: 1px solid var(--gray-4);
+          color: var(--text-primary);
+          padding: 6px 12px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 13px;
+          transition: all 0.2s ease;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        " onmouseover="this.style.background='var(--gray-2)'" onmouseout="this.style.background='transparent'" onclick="toggleLanguage()">
+          <span>🌐</span>
+          <span id="lang-zh-text" style="transition: color 0.2s ease;">中</span>
+          <span style="color: var(--gray-5);">/</span>
+          <span id="lang-en-text" style="transition: color 0.2s ease;">EN</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Q&A List Card -->
+    <div class="card">
+      <div class="card-header" style="border-bottom: none; padding-bottom: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div class="search-input" style="width: 300px;">
+              <input type="text" id="qa-search" class="input" placeholder="搜索问题或答案..." data-i18n-placeholder="search_qa" oninput="handleQASearch(this.value)">
+              <i class="icon icon-search"></i>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="qa-select-btn" class="btn btn-secondary" onclick="toggleQASelectMode()">
+              <img src="/assets/images/select.svg" alt="Select" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+              <span data-i18n="batch_select">批量选择</span>
+            </button>
+            <button id="qa-batch-execute-btn" class="btn btn-primary" style="display: none;" onclick="batchExecuteQA()">
+              <img src="/assets/images/play.svg" alt="Execute" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+              <span id="qa-batch-execute-text" data-i18n="batch_execute" data-i18n-options='{"count": 0}'>批量执行(0)</span>
+            </button>
+            <!-- Memory 开关 -->
+            <div class="memory-switch-container">
+              <label class="switch">
+                <input type="checkbox" id="memory-switch" onchange="toggleMemorySwitch()">
+                <span class="slider round"></span>
+              </label>
+              <span id="memory-label" style="display: inline-flex; align-items: center; gap: 4px;">
+                <img src="/assets/images/memory.svg" alt="记忆" style="width: 16px; height: 16px;">
+                <span data-i18n="memory">记忆</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="qa-list-header" class="files-list-header" style="display: none;">
+          <div style="width: 40px;"></div>
+          <div style="flex: 1; min-width: 0;" data-i18n="question">问题</div>
+          <div style="width: 150px; text-align: center;" data-i18n="learning_status">学习状态</div>
+          <div style="width: 150px; text-align: center;" data-i18n="updated_at">更新时间</div>
+          <div style="width: 100px; text-align: center;" data-i18n="actions">操作</div>
+        </div>
+        <div id="qa-list-container">
+          <!-- Q&A items will be rendered here -->
+        </div>
+        <div id="qa-pagination" class="pagination-controls" style="display: none;">
+          <!-- Pagination controls -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Q&A Detail Modal -->
+    <div id="qa-detail-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) hideModal('qa-detail-modal')">
+      <div class="modal" onclick="event.stopPropagation()" style="max-width: 900px;">
+        <div class="modal-header">
+          <h2 class="modal-title" data-i18n="qa_detail_modal_title">Q&A详情</h2>
+          <span class="modal-close" onclick="hideModal('qa-detail-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" data-i18n="question">问题</label>
+            <div id="modal-question" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md); white-space: pre-wrap;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="answer">答案</label>
+            <div id="modal-answer" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md); white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="how_to_find">如何查找</label>
+            <div id="modal-howtofind" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md); white-space: pre-wrap;"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" data-i18n="source_file">源文件</label>
+              <div id="modal-source-file" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md);"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="created_at">创建时间</label>
+              <div id="modal-created-at" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md);"></div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label" data-i18n="learning_status">学习状态</label>
+              <div id="modal-learning-status" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md);"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="updated_at">更新时间</label>
+              <div id="modal-updated-at" style="padding: 12px; background: var(--gray-2); border-radius: var(--radius-md);"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="hideModal('qa-detail-modal')" data-i18n="close">关闭</button>
+          <button class="btn btn-primary" onclick="executeQAFromModal()">
+            <img src="/assets/images/play.svg" alt="Execute" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+            <span data-i18n="execute">执行</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/components/qa-detail.js"></script>
+
+  <script>
+    // Initialize language on page load
+    function initLanguage() {
+      // Update language toggle button text
+      updateLanguageToggleButton();
+
+      // Update all elements with data-i18n attribute
+      updatePageTranslations();
+
+      // Listen for language changes
+      i18n.onChange(() => {
+        updateLanguageToggleButton();
+        updatePageTranslations();
+      });
+    }
+
+    // Update language toggle button text
+    function updateLanguageToggleButton() {
+      const langZh = document.getElementById('lang-zh-text');
+      const langEn = document.getElementById('lang-en-text');
+      const currentLang = i18n.getLang();
+
+      if (langZh && langEn) {
+        if (currentLang === 'zh') {
+          langZh.style.color = 'var(--text-primary)'; // Active language
+          langEn.style.color = 'var(--gray-5)'; // Dim for inactive
+        } else {
+          langZh.style.color = 'var(--gray-5)'; // Dim for inactive
+          langEn.style.color = 'var(--text-primary)'; // Active language
+        }
+      }
+    }
+
+    // Update all translations on the page
+    function updatePageTranslations() {
+      // Update text content
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const options = element.getAttribute('data-i18n-options');
+        const params = options ? JSON.parse(options) : {};
+        element.textContent = t(key, params);
+      });
+
+      // Update placeholder attributes
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        element.placeholder = t(key);
+      });
+    }
+
+    // Toggle language
+    function toggleLanguage() {
+      i18n.toggleLang();
+    }
+
+    // Toggle Memory switch
+    async function toggleMemorySwitch() {
+      const memorySwitch = document.getElementById('memory-switch');
+      const isEnabled = !!(memorySwitch && memorySwitch.checked);
+
+      const memoryLabel = document.getElementById('memory-label');
+      if (memoryLabel) {
+        memoryLabel.classList.toggle('active', isEnabled);
+      }
+
+      try {
+        await fetch(APP_CONFIG.API_BASE + '/api/memory/config', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ enabled: isEnabled })
+        });
+        console.log(`Memory env updated to: ${isEnabled}`);
+      } catch (e) {
+        console.error("Failed to update memory config", e);
+      }
+    }
+
+    // Initialize page when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize language
+      initLanguage();
+
+      // Initialize QA detail page
+      initQADetail();
+    });
+  </script>
+</body>
+</html>

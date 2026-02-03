@@ -1,0 +1,6 @@
+name: video
+mode: builtin
+activated_tools: null
+config: 
+  google_api_key: "${oc.env:GOOGLE_API_KEY}"
+  google_model: "${oc.env:GOOGLE_MODEL}"

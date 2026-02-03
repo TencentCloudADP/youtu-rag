@@ -1,0 +1,10 @@
+name: wikipedia
+mode: builtin
+activated_tools: null
+config: {
+  "user_agent": "uTu-agent",
+  "language": "en",
+  "content_type": "text",
+  "extract_format": "WIKI",
+}
+config_llm: null

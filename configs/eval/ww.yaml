@@ -1,0 +1,99 @@
+# @package _global_
+
+exp_id: "test"
+
+data:
+  dataset: "WebWalkerQA"
+  type: "single"
+  question_field: "question"
+  gt_field: "answer"
+
+agent:
+  type: orchestra
+  planner_model:
+    model_provider:
+      type: ${oc.env:UTU_LLM_TYPE}
+      model: ${oc.env:UTU_LLM_MODEL}
+      base_url: ${oc.env:UTU_LLM_BASE_URL}
+      api_key: ${oc.env:UTU_LLM_API_KEY}
+    model_settings:
+      reasoning:
+        effort: high
+  reporter_model:
+    model_provider:
+      type: ${oc.env:UTU_LLM_TYPE}
+      model: ${oc.env:UTU_LLM_MODEL}
+      base_url: ${oc.env:UTU_LLM_BASE_URL}
+      api_key: ${oc.env:UTU_LLM_API_KEY}
+    model_settings:
+      reasoning:
+        effort: high
+  workers:
+    SearchAgent:
+      type: simple
+      model:
+        model_provider:
+          type: ${oc.env:UTU_LLM_TYPE}
+          model: ${oc.env:UTU_LLM_MODEL}
+          base_url: ${oc.env:UTU_LLM_BASE_URL}
+          api_key: ${oc.env:UTU_LLM_API_KEY}
+        model_settings:
+          reasoning:
+            effort: high
+      agent:
+        name: WebWalker
+        instructions: |-
+          You are a helpful assistant that can use the web-related and other tools to solve the given task.
+          
+          Keep in mind that:
+          - Do not be overly confident in your own knowledge. Searching can provide a broader perspective and help validate existing knowledge.
+          - If one way fails to provide an answer, try other ways or methods. The answer does exists.
+          - If the search snippet is unhelpful but the URL comes from an authoritative source, try visit the website for more details.
+          - When looking for specific numerical values (e.g., dollar amounts), prioritize reliable sources and avoid relying only on search snippets.
+          - When solving tasks that require web searches, check Wikipedia first before exploring other websites.
+          - Be careful, only give your final answer after you have collected enough information and have enough confidence that your answer is correct.
+          - Do not give up! Try your best to find the answer!
+          - Think and act step by step! You should ALWAYS make *one* tool call at each step, then make next decision based on tool call result!
+
+          Here are some tips that help you perform web search:
+          - Never add too many keywords in your search query! Some detailed results need to perform browser interaction to get, not using search toolkit.
+          - If the question is complex, search results typically do not provide precise answers. It is not likely to find the answer directly using search toolkit only, the search query should be concise and focuses on finding official sources rather than direct answers.
+            For example, as for the question "What is the maximum length in meters of #9 in the first National Geographic short on YouTube that was ever released according to the Monterey Bay Aquarium website?", your first search term must be coarse-grained like "National Geographic YouTube" to find the youtube website first, and then try other fine-grained search terms step-by-step to find more urls.
+        # - The results you return do not have to directly answer the original question, you only need to collect relevant information.
+      toolkits:
+        search: 
+          name: search
+          mode: builtin
+          activated_tools: null
+          config:
+            search_engine: google  # google | jina | baidu | duckduckgo
+            search_params: {"gl": "cn", "hl": "zh-cn"}  # search params for google & jina
+            # https://huggingface.co/datasets/callanwu/WebWalkerQA
+            # https://huggingface.co/spaces/dobval/WebThinker
+            search_banned_sites: ["https://huggingface.co/", "https://grok.com/share/", "https://modelscope.cn/datasets/"]
+            crawl_engine: jina  # jina | crawl4ai
+            summary_token_limit: 10_000
+          config_llm:
+            model_provider:
+              type: ${oc.env:UTU_LLM_TYPE}
+              model: ${oc.env:UTU_LLM_MODEL}
+              base_url: ${oc.env:UTU_LLM_BASE_URL}
+              api_key: ${oc.env:UTU_LLM_API_KEY}
+      max_turns: 50
+  workers_info:
+    - name: SearchAgent
+      desc: information retrieval and data collection.
+      strengths: Web search, information retrieval, research material collection, API data fetching
+      weaknesses: No access to private databases, retrieval only (no content creation/modification)
+
+concurrency: 50
+
+judge_model:
+  model_provider:
+    type: ${oc.env:JUDGE_LLM_TYPE}
+    model: ${oc.env:JUDGE_LLM_MODEL}
+    base_url: ${oc.env:JUDGE_LLM_BASE_URL}
+    api_key: ${oc.env:JUDGE_LLM_API_KEY}
+  model_params:
+    temperature: 0.5
+judge_concurrency: 64

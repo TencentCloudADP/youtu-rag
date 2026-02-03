@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youtu-RAG - 智能知识库管理系统</title>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+
+  <!-- Icon Font (Simple Icons using Unicode) -->
+  <style>
+    .icon-folder::before { content: '📁'; }
+    .icon-database::before { content: '📚'; }
+    .icon-message::before { content: '💬'; }
+    .icon-search::before { content: '🔍'; }
+    .icon-upload::before { content: '⬆️'; }
+    .icon-download::before { content: '⬇️'; }
+    .icon-delete::before { content: '🗑️'; }
+    .icon-edit::before { content: '✏️'; }
+    .icon-settings::before { content: '⚙️'; }
+    .icon-plus::before { content: '➕'; }
+    .icon { display: inline-block; }
+  </style>
+</head>
+<body>
+  <!-- Main App Container -->
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Logo Container -->
+      <div class="logo-container" onclick="window.location.href='index.html'">
+        <img src="assets/images/logo.svg" alt="Youtu Logo" class="logo">
+        <h1>Youtu-RAG</h1>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu">
+        <a href="#/files" class="nav-item" id="nav-files">
+          <img src="assets/images/files.svg" alt="Files" class="nav-icon">
+          <span data-i18n="nav_files">源文件</span>
+        </a>
+        <a href="#/knowledge" class="nav-item" id="nav-knowledge">
+          <img src="assets/images/kbset.svg" alt="Knowledge Base" class="nav-icon">
+          <span data-i18n="nav_knowledge">知识库</span>
+        </a>
+        <a href="#/chat" class="nav-item" id="nav-chat">
+          <img src="assets/images/chatai.svg" alt="Chat AI" class="nav-icon">
+          <span data-i18n="nav_chat">问AI</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div style="padding: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <!-- Language Toggle Button -->
+        <div style="text-align: center; margin-bottom: 12px;">
+          <button id="lang-toggle" class="lang-toggle-btn">
+            <span>🌐</span>
+            <span id="lang-zh">中</span>
+            <span class="lang-divider">/</span>
+            <span id="lang-en">EN</span>
+          </button>
+        </div>
+        <p style="color: #666666; font-size: 12px; text-align: center;" data-i18n="version">Youtu-RAG v1.0.0</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Content Container (Dynamic) -->
+      <div id="content-container" style="transition: opacity 0.3s ease;">
+        <!-- Page content will be loaded here -->
+        <div style="text-align: center; padding: 100px 20px;">
+          <div class="spinner spinner-large" style="margin: 0 auto;"></div>
+          <p style="margin-top: 20px; color: var(--gray-7);">加载中...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Mobile Sidebar Toggle -->
+  <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()">
+    ☰
+  </button>
+
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <!-- PDF.js for PDF viewing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Mammoth.js for DOCX viewing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+  <!-- Configuration (must load first) -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/i18n.js"></script>
+
+  <!-- Scripts -->
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/router.js"></script>
+
+  <!-- Page-specific scripts (loaded dynamically) -->
+  <script src="assets/js/components/file-manager.js"></script>
+  <script src="assets/js/components/knowledge-base.js"></script>
+  <script src="assets/js/components/knowledge-base-detail.js"></script>
+  <script src="assets/js/components/qa-detail.js"></script>
+  <script src="assets/js/components/chat.js"></script>
+
+  <!-- Mobile Sidebar Toggle Script -->
+  <script>
+    // Initialize language on page load
+    function initLanguage() {
+      // Update language toggle button text
+      updateLanguageToggleButton();
+
+      // Update all elements with data-i18n attribute
+      updatePageTranslations();
+
+      // Listen for language changes
+      i18n.onChange(() => {
+        updateLanguageToggleButton();
+        updatePageTranslations();
+      });
+    }
+
+    // Update language toggle button text
+    function updateLanguageToggleButton() {
+      const langZh = document.getElementById('lang-zh');
+      const langEn = document.getElementById('lang-en');
+      const currentLang = i18n.getLang();
+
+      if (langZh && langEn) {
+        if (currentLang === 'zh') {
+          langZh.style.color = '#666666'; // Active language
+          langEn.style.color = 'rgba(255,255,255,0.5)'; // Dim for inactive
+        } else {
+          langZh.style.color = 'rgba(255,255,255,0.5)'; // Dim for inactive
+          langEn.style.color = '#666666'; // Active language
+        }
+      }
+    }
+
+    // Update all translations on the page
+    function updatePageTranslations() {
+      // Update text content
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const options = element.getAttribute('data-i18n-options');
+        const params = options ? JSON.parse(options) : {};
+        element.textContent = t(key, params);
+      });
+
+      // Update placeholder attributes
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        element.placeholder = t(key);
+      });
+    }
+
+    // Language toggle button click handler
+    document.addEventListener('DOMContentLoaded', () => {
+      initLanguage();
+
+      const langToggle = document.getElementById('lang-toggle');
+      if (langToggle) {
+        // Update initial state
+        updateLanguageToggle(i18n.currentLang);
+        
+        langToggle.addEventListener('click', () => {
+          i18n.toggleLang();
+          updateLanguageToggle(i18n.currentLang);
+        });
+      }
+    });
+
+    function updateLanguageToggle(lang) {
+      const zhSpan = document.getElementById('lang-zh');
+      const enSpan = document.getElementById('lang-en');
+      
+      if (zhSpan && enSpan) {
+        if (lang === 'zh') {
+          zhSpan.classList.add('active');
+          enSpan.classList.remove('active');
+        } else {
+          zhSpan.classList.remove('active');
+          enSpan.classList.add('active');
+        }
+      }
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('mobile-open');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('sidebar-toggle');
+
+      if (window.innerWidth <= 768 &&
+          sidebar.classList.contains('mobile-open') &&
+          !sidebar.contains(e.target) &&
+          !toggle.contains(e.target)) {
+        sidebar.classList.remove('mobile-open');
+      }
+    });
+  </script>
+</body>
+</html>

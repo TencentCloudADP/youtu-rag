@@ -1,0 +1,505 @@
+# WebUI 使用指南
+
+Youtu-RAG 提供了一个轻量级的 WebUI 界面，支持文件管理、知识库管理和智能对话等核心功能。
+
+## 访问地址
+
+启动服务后，访问以下地址：
+- 📱 前端界面: http://localhost:8000
+- 📊 监控面板: http://localhost:8000/monitor
+
+---
+
+## 1️⃣ 文件管理
+
+### 1.1 文件上传与预览
+
+#### 操作步骤
+
+1. 访问前端界面 `http://localhost:8000`
+2. 点击左侧边栏的 **"文件管理"**
+3. 点击 **"上传文件"** 按钮
+4. 根据文件类型和文件管理配置，文件将通过不同的路径处理并生成可预览的内容
+
+#### 功能说明
+
+<!-- TODO: 补充详细的文件上传操作说明 -->
+
+#### 支持的文件类型
+
+- **PDF/Word/MD**: 文档类文件
+- **Excel**: 表格数据文件
+- **IMAGE**: 图片文件（PNG/JPG等）
+- **Database**: 数据库文件
+- 支持 12+ 种文件格式
+
+#### 示例演示
+
+<table>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>文件上传示例</strong><br>自动提取元数据并生成摘要
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>PDF 文件处理后预览</strong><br>需要 OCR 配置支持
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/01_upload_file.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/02_pdf_file_example.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>PNG 文件处理后预览</strong><br>需要 OCR 配置支持
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>HiChunk 解析预览</strong><br>需要 HiChunk 配置支持
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/03_png_file_example.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/04_hichunk_example.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+  </tr>
+</table>
+
+> 💡 **提示**: 关于 OCR 和 HiChunk 的配置，请参考 [环境变量配置文档](environment_variables.md)
+
+---
+
+### 1.2 文件批量管理
+
+#### 操作步骤
+
+<!-- TODO: 补充详细的批量管理操作说明 -->
+
+#### 功能说明
+
+当启用 OCR 和 HiChunk 配置时，文档上传的解析阶段将产生额外的时间消耗。建议对此类文件使用单文件导入（批量导入会导致等待时间较长）。
+
+#### 支持的批量操作
+
+- **批量删除**: 选择多个文件进行批量删除
+- **批量上传**: 一次性上传多个文件（建议同类型文件批量上传）
+- **元数据批量编辑**: 支持批量导出、编辑和导入元数据
+- **文件搜索**: 支持按文件名、元数据、摘要等条件搜索
+
+#### 示例演示
+
+<table>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>文件批量删除和上传</strong><br>建议同类型文件一次性批量导入
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>文件元数据批量编辑</strong><br>支持批量导出、编辑和导入
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>文件搜索</strong><br>支持文件名、元数据、摘要等
+    </td>
+  </tr>
+  <tr style="height: 320px;">
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: middle; height: 320px;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/06_batch_delete_upload.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: middle; height: 320px;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/05_metadata_export_import.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: middle; height: 320px;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/07_file_search.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 2️⃣ 知识库管理
+
+### 2.1 知识库创建与删除
+
+#### 操作步骤
+
+1. 访问前端界面 `http://localhost:8000`
+2. 点击左侧边栏的 **"知识库"**
+3. 点击 **"创建知识库"** 按钮
+4. 填写知识库名称（例如：`技术文档`）
+5. 点击确认创建
+
+#### 功能说明
+
+<!-- TODO: 补充详细的知识库创建和删除操作说明 -->
+
+#### 示例演示
+
+<table>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>知识库创建与删除</strong><br>仅支持单个知识库操作
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <strong>知识库搜索</strong><br>支持知识库名称和描述搜索
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/08_kb_create_delete.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/09_kb_search.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+  </tr>
+</table>
+
+---
+
+### 2.2 知识库内容关联与向量化构建
+
+#### 操作步骤
+
+1. **文件关联**: 将已上传的文件关联到知识库
+2. **数据库关联**: 将本地数据库关联到知识库
+3. **示例关联**: 将示例问答对关联到知识库（作为经验信息）
+
+> 💡 **重要提示**: 完成每种关联配置后，需要点击 **"保存关联"** 按钮保存关联配置，避免之前的选择丢失
+
+#### 功能说明
+
+<!-- TODO: 补充详细的内容关联和向量化构建操作说明 -->
+
+#### 关联类型
+
+- **文件关联**: 支持多个文件同时关联
+- **数据库关联**: 支持 Sqlite 和 MySQL 数据库
+- **示例关联**: 支持示例问答对的关联
+
+#### 示例演示
+
+<table>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>文件关联</strong><br>可一次性选择多个文件进行关联
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>数据库关联</strong><br>支持 Sqlite 和 MySQL
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>示例关联</strong><br>支持示例问答对的关联
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/10_kb_file_association.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/11_kb_db_association.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/12_kb_qa_example.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>知识库配置查看</strong><br>查看关联配置和构建配置
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>知识库向量化构建</strong><br>统一构建不同类型的关联内容
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>知识库关联编辑</strong><br>支持关联内容的编辑更新
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/13_kb_config_show.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/14_kb_build.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/15_kb_modify.mov" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 3️⃣ 智能对话
+
+### 3.1 Agent 选择与使用
+
+您可以选择已配置的 Agent 进行不同任务的对话或问答：
+- 部分 Agent 需要在选择知识库或文件后才能使用
+- 提供临时文件上传按钮，支持临时文件上传进行问答，但该文件仅会自动关联到当前知识库，不会进行向量构建
+
+#### 操作步骤
+
+<!-- TODO: 补充详细的 Agent 选择和使用操作说明 -->
+
+---
+
+### 3.2 记忆功能
+
+在前端对话界面中，打开右下角的 **"记忆"** 开关即可启用双层记忆机制。启用记忆后，Agent 将具备：
+
+- **短期记忆**: 记住对话上下文，避免重复提问
+- **长期记忆**: 积累成功经验，下次遇到类似问题时优先复用
+
+#### 功能说明
+
+<!-- TODO: 补充详细的记忆功能操作说明 -->
+
+---
+
+### 3.3 可用 Agent 列表
+
+#### 💬 Chat Agent
+
+**功能特点**:
+- 基础对话 Agent
+- 建议开启"记忆"以支持多轮对话
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/16_chat_agent.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 🔍 Web Search Agent
+
+**功能特点**:
+- 支持网页搜索
+- 可访问链接探索详细内容并回答
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/17_websearch_agent.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 📚 KB Search Agent
+
+**功能特点**:
+- 必须选择知识库
+- 支持向量检索和重排序
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/18_kbsearch_agent.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 📚 Meta Retrieval Agent
+
+**功能特点**:
+- 必须选择知识库
+- 支持向量检索和重排序
+- 支持问题意图解析和元数据筛选
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/19_meta_retrieval_agent.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 📄 File QA Agent
+
+**功能特点**:
+- 必须选择知识库和文件
+- 支持 Python 读取和处理文件内容
+- 支持向量检索和重排序
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/20_file_qa_agent.mp4" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 📊 Excel Agent
+
+**功能特点**:
+- 必须选择知识库和文件
+- 问题分解和数据处理步骤分解
+- Python 代码执行和反思
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/22_excel_agent.mp4" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 💻 Text2SQL Agent
+
+**功能特点**:
+- 必须选择已关联数据库的知识库
+- 问题分解和 SQL 代码生成与执行
+- SQL 查询结果展示和反思
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/21_text2sql_agent.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+### 3.4 记忆功能示例
+
+#### 🧠 短期记忆
+
+**功能特点**:
+- 在 Session 内生效
+- 用于支持多轮对话
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/23_memory_chat.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 🧠 长期记忆
+
+**功能特点**:
+- 长期生效
+- 用于积累成功经验
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/24_long_memory_chat.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+#### 🧐 Text2SQL Agent with Memory
+
+**功能特点**:
+- 短期记忆在 Session 内生效
+- 长期记忆可避免类似问题产生额外的 token 消耗
+
+**使用场景**:
+<!-- TODO: 补充详细的使用场景说明 -->
+
+**示例演示**:
+
+<video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v0.1.0/25_text2sql_memory.mov" 
+       controls muted preload="metadata" 
+       width="100%" 
+       style="max-height: 300px; object-fit: cover; border-radius: 8px;"></video>
+
+---
+
+## 技术特性
+
+- **零依赖**: 纯原生 HTML + CSS + JavaScript 实现，无框架依赖
+- **流式响应**: 支持流式输出，实时显示 AI 回复
+- **易操作**: 简洁直观的用户界面
+
+---
+
+## 相关文档
+
+- [环境变量配置](environment_variables.md)
+- [快速开始指南](quickstart.md)
+

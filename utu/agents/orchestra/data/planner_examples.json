@@ -1,0 +1,52 @@
+[
+    {
+        "question": "哪位乌兹别克斯坦网球选手赢得了2016年在曲靖举行的首届ITF 2.5万美元赛事单打冠军，他出生于哪一年？",
+        "available_agents": [
+            {
+                "agent_name": "SearchAgent",
+                "description": "Web search, information retrieval, research material collection, API data fetching"
+            }
+        ],
+        "analysis": "这个问题需要找出2016年曲靖ITF赛事单打冠军的身份和出生年份。需要分步骤搜索：首先找到赛事信息，然后确认冠军身份，最后获取个人资料。由于涉及具体的赛事年份、地点和选手国籍，需要通过多个搜索步骤来获取准确信息。",
+        "plan": [
+            {"agent_name": "SearchAgent", "task": "搜索2016年曲靖ITF 2.5万美元网球赛事的相关信息和比赛结果", "completed": false},
+            {"agent_name": "SearchAgent", "task": "查找2016年曲靖ITF 2.5万美元赛事单打冠军获得者的详细信息", "completed": false},
+            {"agent_name": "SearchAgent", "task": "确认单打冠军选手的乌兹别克斯坦国籍身份", "completed": false},
+            {"agent_name": "SearchAgent", "task": "搜索乌兹别克斯坦单打冠军选手的个人资料和出生年份", "completed": false}
+        ]
+    },
+    {
+        "question": "在20世纪初，南半球发现了一种天文现象，后来由一位在19世纪末加入美国中西部一所著名大学的教授拍摄了照片。同年，一件来自太空的物体在一个美国小镇附近被发现。拍摄该天文现象照片的教授是谁？",
+        "available_agents": [
+            {
+                "agent_name": "SearchAgent",
+                "description": "Web search, information retrieval, research material collection, API data fetching"
+            }
+        ],
+        "analysis": "这是一个复杂的历史搜索问题，涉及多个关联信息：20世纪初的南半球天文现象、19世纪末美国中西部大学教授、同年的太空物体发现事件。需要通过多角度搜索来找到这些历史事件的交集，从而确定教授身份。",
+        "plan": [
+            {"agent_name": "SearchAgent", "task": "搜索20世纪初在南半球发现的主要天文现象和相关事件", "completed": false},
+            {"agent_name": "SearchAgent", "task": "查找19世纪末美国中西部著名大学的相关信息和教授名单", "completed": false},
+            {"agent_name": "SearchAgent", "task": "搜索拍摄南半球天文现象照片的美国中西部大学教授信息", "completed": false},
+            {"agent_name": "SearchAgent", "task": "查找20世纪初在美国小镇附近发现的太空物体事件详情", "completed": false}
+        ]
+    },
+    {
+        "question": "A system that was revised in a work published in the first decade of the 21st century, which itself was associated with the expansion of a Japanese company's presence in the United States during that period, has had significant influence on the field of education. What is the name of the original educational framework that was revised in the aforementioned work?",
+        "available_agents": [
+            {
+                "agent_name": "SearchAgent",
+                "description": "Web search, information retrieval, research material collection, API data fetching"
+            }
+        ],
+        "analysis": "This question requires identifying an educational framework that was revised in early 2000s work connected to Japanese company expansion in the US. The search needs to connect Japanese business expansion with educational publications during 2000-2010, then identify the specific revised educational framework.",
+        "plan": [
+            {"agent_name": "SearchAgent", "task": "Search for Japanese companies that expanded their presence in the United States during 2000-2010", "completed": true},
+            {"agent_name": "SearchAgent", "task": "Identify educational works and publications released in the first decade of the 21st century", "completed": false},
+            {"agent_name": "SearchAgent", "task": "Find connections between Japanese company US expansion and educational publications during 2000-2010", "completed": false},
+            {"agent_name": "SearchAgent", "task": "Research educational frameworks and systems that were revised during the first decade of 21st century", "completed": false},
+            {"agent_name": "SearchAgent", "task": "Locate the specific educational work that revised an existing educational system and was associated with Japanese company expansion", "completed": false}
+        ]
+    }
+]
+

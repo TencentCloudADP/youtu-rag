@@ -1,0 +1,30 @@
+# @package _global_
+defaults:
+  # planner model
+  - /model/base@orchestrator_model
+  # router agent (可选，如果需要先判断是否并行)
+  # - /agents/router/base@orchestrator_router
+  # workers - 添加所有可用的 agents
+  # - /agents/ragref/kb_search/kb_search@orchestrator_workers.KBSearch
+  - /agents/ragref/text2sql/text2sql@orchestrator_workers.Text2SQL
+  # - /agents/simple/base_search@orchestrator_workers.WebSearch
+  - _self_
+
+type: parallel_orchestrator
+
+orchestrator_config:
+  name: ParallelOrchestratorAgent
+  additional_instructions: ""
+  max_parallel: 4  # 最大并行任务数
+  task_timeout: 300  # 单个任务超时时间（秒）
+  add_chitchat_subagent: false  # 是否添加闲聊子agent
+
+orchestrator_workers_info:
+  # - name: ExcelQA
+  #   description: Quick Q&A analysis on Excel files using Python. Suitable for extracting data, calculating statistics, and answering specific questions about Excel content.
+  # - name: KBSearch
+  #   description: Semantic search in knowledge base. Use this to find relevant documents, historical records, or reference materials from the knowledge base.
+  - name: Text2SQL
+    description: Convert natural language questions to SQL queries and execute them on databases. Use this to query structured data from databases.
+  # - name: WebSearch
+  #   description: Search the web for current information, news, and online resources. Use this when you need up-to-date information not available in local sources.

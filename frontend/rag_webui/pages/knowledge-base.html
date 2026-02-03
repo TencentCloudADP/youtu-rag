@@ -1,0 +1,101 @@
+<!-- Knowledge Base Management Page -->
+
+<div class="page-header card" style="margin-bottom: 6px;">
+  <div class="header-left">
+    <h1 class="header-title" data-i18n="kb_management_title">知识库管理</h1>
+  </div>
+  <button class="btn btn-primary" onclick="createKnowledgeBase()">
+    <img src="assets/images/add.svg" alt="Add" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+    <span data-i18n="create_knowledge_base">创建知识库</span>
+  </button>
+</div>
+
+<!-- Search and Filter -->
+<div class="card" style="margin-bottom: 6px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+    <div class="search-input" style="flex: 1; min-width: 300px; max-width: 400px;">
+      <input
+        type="text"
+        id="kb-search"
+        class="input"
+        placeholder="Search by keyword in kb name or description..."
+        data-i18n-placeholder="kb_search_placeholder"
+        oninput="handleKBSearch(this.value)"
+      >
+      <i class="icon icon-search"></i>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button id="kb-select-mode-btn" class="btn btn-secondary" onclick="toggleKBSelectMode()">
+        <img src="assets/images/select.svg" alt="Select" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;">
+        <span data-i18n="select">选择</span>
+      </button>
+      <button id="kb-batch-delete-btn" class="btn" style="display: none; background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="batchDeleteKnowledgeBases()">
+        <img src="assets/images/delete.svg" alt="Delete" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle; filter: invert(23%) sepia(89%) saturate(3815%) hue-rotate(346deg) brightness(88%) contrast(92%);">
+        <span id="kb-batch-delete-text" data-i18n="delete_selected" data-i18n-options='{"count": 0}'>删除选中(0)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Knowledge Base Cards Grid -->
+<div class="card-container" id="kb-list">
+  <!-- Knowledge base cards will be inserted here -->
+  <div style="grid-column: 1 / -1; text-align: center; padding: 48px;">
+    <div class="spinner spinner-large" style="margin: 0 auto;"></div>
+    <p style="margin-top: 16px; color: var(--gray-7);" data-i18n="loading_kb_list">加载知识库列表...</p>
+  </div>
+</div>
+
+<!-- Create/Edit Knowledge Base Modal -->
+<div id="kb-modal" class="modal-overlay" style="display: none;" onclick="if(event.target === this) hideModal('kb-modal')">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width: 800px;">
+    <div class="modal-header">
+      <h2 class="modal-title" id="kb-modal-title" data-i18n="create_knowledge_base">创建知识库</h2>
+      <span class="modal-close" onclick="hideModal('kb-modal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <!-- Basic Info -->
+      <div class="form-group">
+        <label class="form-label"><span data-i18n="kb_name_label">知识库名称 *</span> <span style="color: var(--gray-6); font-weight: normal; font-size: 12px;" data-i18n="kb_name_en_label">(Knowledge Base Name)</span></label>
+        <input type="text" id="kb-name" class="input" placeholder="输入知识库名称" data-i18n-placeholder="enter_kb_name" required maxlength="80" oninput="updateCharCount('kb-name', 'kb-name-count', 80)">
+        <span class="form-help" style="display: flex; justify-content: space-between;">
+          <span><span data-i18n="max_characters" data-i18n-options='{"max": 80}'>最多80个字符</span> <span data-i18n="max_characters_en" data-i18n-options='{"max": 80}'>(Max 80 characters)</span></span>
+          <span id="kb-name-count" style="color: var(--primary-blue); font-weight: 500;">0/80</span>
+        </span>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><span data-i18n="kb_description_label">描述</span> <span style="color: var(--gray-6); font-weight: normal; font-size: 12px;" data-i18n="kb_description_en_label">(Description)</span></label>
+        <textarea id="kb-description" class="input" rows="4" placeholder="输入知识库描述" data-i18n-placeholder="enter_kb_description" maxlength="500" oninput="updateCharCount('kb-description', 'kb-desc-count', 500)"></textarea>
+        <span class="form-help" style="display: flex; justify-content: space-between;">
+          <span><span data-i18n="max_characters" data-i18n-options='{"max": 500}'>最多500个字符</span> <span data-i18n="max_characters_en" data-i18n-options='{"max": 500}'>(Max 500 characters)</span></span>
+          <span id="kb-desc-count" style="color: var(--primary-blue); font-weight: 500;">0/500</span>
+        </span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="hideModal('kb-modal')" data-i18n="cancel">取消</button>
+      <button class="btn btn-primary" onclick="saveKnowledgeBase()">
+        <span id="save-kb-text" data-i18n="save">保存</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Build Progress Modal -->
+<div id="build-progress-modal" class="modal-overlay" style="display: none;">
+  <div class="modal" onclick="event.stopPropagation()" style="max-width: 500px;">
+    <div class="modal-header">
+      <h2 class="modal-title" data-i18n="build_kb">构建知识库</h2>
+    </div>
+    <div class="modal-body">
+      <p id="build-status-text" data-i18n="build_kb_progress">正在构建知识库，请稍候...</p>
+      <div class="progress" style="margin-top: 16px;">
+        <div class="progress-bar" id="build-progress-bar" style="width: 0%;"></div>
+      </div>
+      <p id="build-progress-text" style="margin-top: 8px; font-size: 14px; color: var(--gray-7);">0%</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="hideModal('build-progress-modal')" data-i18n="close">关闭</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - /tools/search@toolkits.search
+  - _self_
+
+agent:
+  name: utu-base
+  instructions: |-
+    You are a helpful assistant with access to web search capabilities.
+
+    You can use the `search` tool to find current information from the internet.
+    You can use the `web_qa` tool to extract detailed information from specific webpages.
+
+

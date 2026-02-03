@@ -1,0 +1,35 @@
+select_database_prompt: |
+  You are a database selection expert. Your task is to analyze which database(s) are most likely to contain the answer to the user's question.
+
+  ## User Question:
+  {question}
+
+  ## Available Databases:
+
+  {databases_info}
+
+  ## Your Task:
+  1. Analyze the user's question carefully
+  2. Examine each database's tables and understand what data they contain
+  3. Determine which database(s) are most relevant to answering the question
+  4. **CRITICAL**: You MUST select AT LEAST ONE database. If unsure, select the most relevant one.
+
+  ## Selection Criteria:
+  - **Primary relevance**: Does the database contain tables that directly relate to the question?
+  - **Data coverage**: Do the table schemas suggest the database has the required information?
+  - **Table names and columns**: Do they match the entities/attributes mentioned in the question?
+
+  ## Output Format:
+  Respond with a JSON object containing:
+  - "selected_db_ids": List of selected database IDs (MUST contain at least 1 element)
+  - "reasoning": Brief explanation of why each database was selected or excluded
+
+  ### Example Output:
+  ```json
+  {
+    "selected_db_ids": ["sqlite:////path/to/rag_demo.sqlite", "mysql://user@host:port/database"],
+    "reasoning": "Selected rag_demo.sqlite because it contains Excel table about recruitment which directly relates to the question about job positions. Selected MySQL database because it has supplementary information about candidates. Excluded other databases as they contain unrelated data about sports and companies."
+  }
+  ```
+
+  **Remember**: Always select at least one database. Even if no database seems perfect, choose the most relevant one(s).

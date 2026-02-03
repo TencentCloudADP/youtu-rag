@@ -1,0 +1,124 @@
+TASK_EXECUTE_USER_PROMPT: |
+  Now finish your task (Note that you have no ability to ask user for confirmation or help, just finish the task without asking or confirmation):
+
+  <overall_task>
+  {overall_task}
+  </overall_task>
+
+  <overall_plan_to_solve_the_task>
+  {overall_plan}
+  </overall_plan_to_solve_the_task>
+
+  <current_subtask>
+  <task_name>
+  {task_name}
+  </task_name>
+
+  <task_description>
+  {task_description}
+  </task_description>
+  </current_subtask>
+
+  Note: The overall task is <overall_task>, and you are currently working on the subtask <current_subtask>. Focus on completing this specific subtask while keeping the overall goal in mind.
+
+TASK_EXECUTE_WITH_REFLECTION_USER_PROMPT: |
+  You have previously failed to complete this task. Now retry based on the failure experience  (Note that you have no ability to ask user for confirmation or help, just finish the task without asking or confirmation):
+
+  <overall_task>
+  {overall_task}
+  </overall_task>
+
+  <overall_plan_to_solve_the_task>
+  {overall_plan}
+  </overall_plan_to_solve_the_task>
+
+  <current_subtask>
+  <task_name>
+  {task_name}
+  </task_name>
+
+  <task_description>
+  {task_description}
+  </task_description>
+  </current_subtask>
+
+  <previous_attempts_and_reflections>
+  {previous_attempts}
+  </previous_attempts_and_reflections>
+
+  Note: The overall task is <overall_task>, and you are currently working on the subtask <current_subtask>. Based on the above reflections, analyze the failure causes from previous attempts, identify what went wrong, and explore the correct path to complete this subtask successfully. Use the lessons learned to improve your approach and avoid repeating the same mistakes.
+
+TASK_CHECK_PROMPT: |
+  Please carefully evaluate whether you have successfully completed the given task.
+
+  <task_name>
+  {task_name}
+  </task_name>
+
+  <task_description>
+  {task_description}
+  </task_description>
+
+  First, reflect on your work by considering the following:
+  1. What was the specific objective of this task?
+  2. What actions did you take to address this task?
+  3. What results or outputs did you produce?
+  4. Do your results fully satisfy the task requirements?
+  5. Are there any remaining steps or aspects that still need to be completed?
+
+  Based on your reflection, determine whether the task has been completely finished. A task is considered complete only when all requirements have been fully met and no further action is needed.
+
+  Please provide your analysis and then answer with 'yes' or 'no' using the <task_check> tag:
+  - If the task is NOT fully completed, output <task_check>no</task_check>
+  - If the task IS fully completed, output <task_check>yes</task_check>
+
+TASK_REFLECTION_PROMPT: |
+  You attempted to complete the following task but were unsuccessful:
+
+  <task_name>
+  {task_name}
+  </task_name>
+
+  <task_description>
+  {task_description}
+  </task_description>
+
+  Please reflect on your attempt and provide a concise analysis for future retry attempts.
+
+  ## What Went Wrong
+  - **Primary failure reason**: Why did your attempt fail?
+  - **What you tried**: Briefly list the methods/approaches you used
+  - **What worked partially**: Any successful components worth keeping
+
+  ## Lessons Learned
+  - **Key insight**: What did you learn from this failure?
+  - **Mistake to avoid**: What should not be repeated next time?
+
+  ## Retry Strategy
+  - **New approach**: How will you tackle this differently?
+  - **Better tools/methods**: What should be prioritized in the retry?
+  - **Success checkpoint**: How will you know you're making progress?
+
+# TASK_SUMMARY_SYSTEM_PROMPT: |
+#   Keep your response focused and actionable. This reflection will guide your next attempt.
+
+TASK_SUMMARY_USER_PROMPT: |
+  You are a task summarizer. Your job is to summarize the execution results of a given task. The summary should include the final output, results, and any files generated or modified during the task execution. Avoid using any formatting markup such as markdown.
+
+  Based on the following task information, please summarize what you accomplished during the task execution:
+
+  <task_name>
+  {task_name}
+  </task_name>
+
+  <task_description>
+  {task_description}
+  </task_description>
+
+  Please provide a concise summary that includes:
+  1. Your initial answer or solution to the task
+  2. Any files that were created, modified, or generated during execution. If no files were created, skip this point.
+  3. Key results or outputs produced
+  4. Important steps taken to complete the task
+
+  Focus on the concrete deliverables and outcomes. Avoid any formatting markup such as markdown.

@@ -1,0 +1,90 @@
+# Other folders
+database/
+
+# Python-generated files
+.codebuddy/
+__pycache__/
+database/
+part.1
+.minio.sys/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+*.sqlite3
+
+# Virtual environments
+.venv
+
+# File types to ignore
+*.meta
+*.log
+*.db
+*.jsonl
+*.csv
+*.xlsx
+*.xls
+*.pdf
+*.mp3
+*.mp4
+*.wav
+*.MOV
+*.xml
+# *.png
+*.jpg
+*.zip
+*.docx
+*.pptx
+*.m4a
+*.pdb
+*.bak
+*.publish
+# *.html
+*.pkl
+*.whl
+*.bin
+
+# Python related
+.pytest_cache/
+.mypy_cache/
+!__init__.py
+
+# Data directories
+/.cache/
+/data/
+/site/
+/logs/
+/rag_data/relational_database/
+/rag_data/vector_store/
+/rag_data/vector_store_faiss/
+
+# generated configs
+/configs/tools/generated
+/configs/agents/generated
+
+# IDEs and editors
+.idea/
+.vscode/
+.gemini/
+.claude/
+.codex/
+
+# OS files
+.DS_Store
+
+# Environment Variables
+.env
+
+# Misc
+# temp files
+# _*
+.NOTES
+# temp config
+test.yaml
+pgs
+CLAUDE.md
+.mcp.json
+.specify
+alembic.ini
+alembic/

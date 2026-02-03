@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  - /model/base@orchestrator_model
+  - /agents/router/base@orchestrator_router  # router
+  - /agents/simple/search_agent@orchestrator_workers.SearchAgent
+  - /agents/simple/data_analysis_agent@orchestrator_workers.DataAnalysisAgent
+  - /agents/simple/html_generator@orchestrator_workers.HTMLGenerator
+  - _self_
+
+
+type: orchestrator
+
+orchestrator_config:
+  # examples_path: planner_examples_data.json
+  name: DataAnalysisAgent
+  additional_instructions: |-
+    Your main object is generating HTML according to user's request. So,
+    - If user's request is not clear enough, use the ChitchatAgent to help clarify user's request. (If available)
+    - Else, use the HTMLGeneratorAgent to generate HTML code after other agents provides enough information.
+
+orchestrator_workers_info:
+  - name: SearchAgent
+    desciption: Performs focused, in-depth information retrieval. Excels at locating reliable sources, synthesizing knowledge from multiple references, and answering research-oriented queries.
+  - name: DataAnalysisAgent
+    description: Exploring and analyzing tabular data files (CSV, Excel, etc.), performing automated field extraction, statistical analysis, pattern discovery, and generating data insights
+  - name: HTMLGenerator
+    description: Generates HTML reports based on provided information

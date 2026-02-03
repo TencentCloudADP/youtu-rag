@@ -1,0 +1,23 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+  name: document_processing_agent
+  instructions: |-
+    You are a helpful assistant that can process documents and multimodal data, such as images, audio, and video.
+
+toolkits:
+  code_runner:
+    name: code_runner_toolkit
+    mode: customized
+    customized_filepath: examples/gaia/tools/code_execution_toolkit.py
+    customized_classname: CodeExecutionToolkit
+    activated_tools: null
+  document_processing:
+    name: document_processing_toolkit
+    mode: customized
+    customized_filepath: examples/gaia/tools/document_processing_toolkit.py
+    customized_classname: DocumentProcessingToolkit
+    activated_tools: null  # ["extract_document_content"]

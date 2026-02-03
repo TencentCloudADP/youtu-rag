@@ -1,0 +1,20 @@
+# @package _global_
+defaults:
+  - /model/base@orchestrator_model
+  - /agents/router/base@orchestrator_router  # router
+  - /agents/simple/search_agent@orchestrator_workers.SearchAgent
+  - /agents/simple/paper_summarize_agent@orchestrator_workers.PaperSummarizeAgent
+  - _self_
+
+
+type: orchestrator
+
+orchestrator_config:
+  name: PaperCollectorAgent
+  # examples_path: planner_examples_data.json
+
+orchestrator_workers_info:
+  - name: SearchAgent
+    description: Web search, information retrieval, research material collection, API data fetching
+  - name: PaperSummarizeAgent
+    description: Explore and summarize paper, return the abstract, related papers, core methods and experiment conclusions

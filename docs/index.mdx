@@ -1,0 +1,58 @@
+---
+title: Using Youtu-RAG Locally
+description: Guide on how to deploy and use Youtu-RAG on your local machine.
+---
+
+This document provides a step-by-step guide on how to deploy and use Youtu-RAG on your local machine. Specifically, it covers setting up the Youtu Embedding, HiChunk, Youtu Parsing backend services and integrating them with Youtu-RAG.
+
+Alternatively, you may consider deploying the backend services on TencentCloud Ti-one platform. See [Deploying with TencentCloud Ti-one](/docs/ti-one) for more details.
+
+## Step 1: Deploy Youtu Embedding Service
+Follow the instructions in [Deploying Youtu Embedding Locally](/docs/youtu-embedding/deploying_locally) or [Deploying Youtu Embedding with Docker](/docs/youtu-embedding/docker_image) to set up the Youtu Embedding service. Then add the following configuration to your `.env` file:
+
+```bash
+# =============================================
+# Embeddings
+# =============================================
+
+# Set configs/rag/xx.yaml embedding type: "local" 
+# Youtu-Embedding-2B (Local Service, 2048 dimensions)
+UTU_EMBEDDING_URL=http://<your_embedding_server_host>:<port>
+UTU_EMBEDDING_MODEL=youtu-embedding-2B
+```
+
+## Step 2: Deploy HiChunk Service
+Follow the instructions in [Deploying HiChunk Locally](/docs/hichunk/deploying_locally) or [Deploying HiChunk with Docker](/docs/hichunk/docker_image) to set up the HiChunk service. Then add the following configuration to your `.env` file:
+
+```bash
+# =============================================
+# Chunk
+# =============================================
+# set configs/rag/file_management.yaml chunk.enabled: true
+UTU_CHUNK_BASE_URL=http://<your_hichunk_server_host>:<port>
+UTU_CHUNK_MODEL=hichunk
+```
+
+You will also need to set the chunking parameters in your RAG configuration file to `true` in `configs/rag/file_management.yaml`:
+
+```yaml
+chunk:
+  enabled: true # set to true to enable chunking
+  model: "${UTU_CHUNK_MODEL}"
+  base_url: "${UTU_CHUNK_BASE_URL}"
+```
+
+## Step 3: Deploy Youtu Parsing Service
+Follow the instructions in [Deploying Youtu Parsing Locally](/docs/youtu-parsing/deploying_locally) or [Deploying Youtu Parsing with Docker](/docs/youtu-parsing/docker_image) to set up the Youtu Parsing service. Then add the following configuration to your `.env` file:
+
+```bash
+# =============================================
+# OCR
+# =============================================
+UTU_OCR_BASE_URL=https://<your_youtu_parsing_server_host>:<port>
+UTU_OCR_MODEL=youtu-parsing
+```
+
+
+## Final Step: Running Youtu-RAG Locally
+With all backend services deployed and configured, you can now run Youtu-RAG locally. Ensure that your `.env` file contains the correct host and port information for each service you have deployed.

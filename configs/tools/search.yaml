@@ -1,0 +1,31 @@
+name: search
+mode: builtin
+activated_tools: null
+
+config:
+  # search config
+  # - `JINA_API_KEY` (Optional) for jina. Ref: https://jina.ai/
+  # - `SERPER_API_KEY` is required for google. Ref: https://serper.dev/
+  search_engine: google  # google | jina | baidu | duckduckgo
+  search_params: {}  # {"gl": "cn", "hl": "zh-cn"}  # search params for google & jina
+  search_banned_sites: []
+
+  # crawl config
+  # - `JINA_API_KEY` is required for jina
+  # - `crawl4ai` and `playwright` should be installed for crawl4ai. Ref: https://github.com/unclecode/crawl4ai
+  crawl_engine: jina  # jina | crawl4ai
+  crawl_params: {}  # {"add_image_desc": True, "add_links": True}  # crawl features for jina
+  crawl_jina_params: {}
+  # You can add more Jina params here. Ref: https://r.jina.ai/docs for Jina crawl params. e.g.
+  #  {"X-With-Generated-Alt": "true"} to add image description; 
+  #  {"X-With-Links-Summary": "true"} to add links at the end of webcontent
+  #  {"X-No-Cache": "true"} to avoid cache
+
+  # llm config used in web_qa
+  summary_token_limit: 10_000
+
+config_llm:
+  model_provider:
+    type: ${oc.env:UTU_LLM_TYPE}
+    model: ${oc.env:UTU_LLM_MODEL}
+

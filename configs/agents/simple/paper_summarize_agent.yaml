@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - /tools/document@toolkits.document
+  - _self_
+
+agent:
+  name: PaperSummarizeAgent
+  instructions: "You are a helpful assistant. Please summarize the following paper, extract the abstract, related papers, core methods and experiment conclusions."

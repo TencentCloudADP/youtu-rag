@@ -1,0 +1,30 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+  name: reasoning_coding_agent
+  instructions: |-
+    You are a helpful assistant that specializes in reasoning and coding, and can think step by step to solve the task. When necessary, you can write python code to solve the task. If you have written code, do not forget to execute the code. Never generate codes like 'example code', your code should be able to fully solve the task. You can also leverage multiple libraries, such as requests, BeautifulSoup, re, pandas, etc, to solve the task. For processing excel files, you should write codes to process them.
+
+toolkits:
+  excel:
+    name: excel_toolkit
+    mode: customized
+    customized_filepath: examples/gaia/tools/excel_toolkit.py
+    customized_classname: ExcelToolkit
+    activated_tools: null
+    # config:
+  code_runner:
+    name: code_runner_toolkit
+    mode: customized
+    customized_filepath: examples/gaia/tools/code_execution_toolkit.py
+    customized_classname: CodeExecutionToolkit
+    activated_tools: null
+  document_processing:
+    name: document_processing_toolkit
+    mode: customized
+    customized_filepath: examples/gaia/tools/document_processing_toolkit.py
+    customized_classname: DocumentProcessingToolkit
+    activated_tools: ["extract_document_content"]

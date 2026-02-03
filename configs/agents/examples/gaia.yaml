@@ -1,0 +1,27 @@
+# @package _global_
+defaults:
+  # - model: base
+  - /model/base@workforce_planner_model
+  - /model/base@workforce_assigner_model
+  - /model/base@workforce_answerer_model
+  - /agents/simple/gaia_web_search@workforce_executor_agents.Web Search Agent
+  # - /agents/simple/gaia_web_browsing@workforce_executor_agents.Web Browsing Agent
+  - /agents/simple/gaia_document_processing@workforce_executor_agents.Document Processing Agent
+  - /agents/simple/gaia_reasoning_coding@workforce_executor_agents.Reasoning Coding Agent
+  - _self_
+
+type: workforce
+
+workforce_executor_config:
+  max_tries: 2  # max tries for task execution
+  return_summary: true  # whether to return summary
+
+workforce_executor_infos:
+  - name: Web Search Agent
+    description: A web information search specialist that excels at finding relevant information through search tools (Google, Wikipedia, archived pages) and extracting webpage content for understanding. Focuses on information discovery and identifying authoritative sources.
+  # - name: Web Browsing Agent
+  #   description: A web browsing specialist that excels at deep website navigation and interaction through browser simulation. Can perform complex browser actions like clicking, scrolling, form filling, and extracting content from JavaScript-rendered pages.
+  - name: Document Processing Agent
+    description: A helpful assistant that can process a variety of local and remote documents, including pdf, docx, images, audio, and video, etc.
+  - name: Reasoning Coding Agent
+    description: A helpful assistant that specializes in reasoning, coding, and processing excel files. However, it cannot access the internet to search for information. If the task requires python execution, it should be informed to execute the code after writing it.

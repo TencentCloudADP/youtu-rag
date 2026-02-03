@@ -1,0 +1,127 @@
+STEP_1_REQUIREMENT: |
+  User Requirement:
+  "{{ user_request }}"
+
+  Task:
+  Generate a function schema that represents this requirement. The schema must include:
+  - name: a concise function name (snake_case)
+  - description: a short English description of what the function does
+
+  Requirements:
+  - Language: response in the same language with the user request
+  - Use the `ask_user` tool only if needed
+
+  Output ONLY JSON, example format:
+  ```json
+  {
+      "name": "convert_video_to_gif",
+      "description": "Given a video file, convert it to GIF format. The output file will be saved to the same directory as the input file with a .gif extension. Tech stack: ffmpeg"
+  }
+  ```
+
+STEP_2_IMPLEMENTATION: |
+  Task:
+  Generate a Python class implementing this function. Requirements:
+  - Include minimal error handling
+  - Do NOT include extra explanations, only code
+  - Prefer using well-known libraries and command line tools (if available) instead of writing your own. E.g. ffmpeg, ytdlp, etc.
+
+  Example:
+  ```python
+  import subprocess
+  from pathlib import Path
+
+
+  class ConvertVideoToGif:
+      def convert_video_to_gif(self, input_path: str, output_path: str = None) -> str:
+          """Convert a video file to GIF format
+
+          Args:
+              input_path (str): Path to the input video file
+              output_path (str, optional): Path to save the output GIF. Defaults to None.
+          """
+          if not Path(input_path).exists():
+              raise FileNotFoundError(f"Input file not found: {input_path}")
+
+          if output_path is None:
+              output_path = Path(input_path).with_suffix(".gif")
+
+          try:
+              cmd = ["ffmpeg", "-i", input_path, "-vf", "fps=10,scale=320:-1:flags=lanczos", "-c:v", "gif", output_path]
+              subprocess.run(cmd, check=True, capture_output=True)
+              return f"Converted video to GIF: {output_path}"
+          except subprocess.CalledProcessError as e:
+              raise RuntimeError(f"FFmpeg conversion failed: {e.stderr.decode()}") from e
+  ```
+
+  Output:
+  Complete Python code for `runner.py`
+
+STEP_3_MANIFEST: |
+  Task:
+  Generate a manifest.json for this MCP tool with fields:
+  - class_name: the implemented Python class name
+  - methods: the implemented function names
+  - system_tools: required system tools
+  - requirements: required Python packages for this tool
+  - api_keys: required API keys for this tool (if any)
+
+  Output ONLY valid JSON, example:
+  ```json
+  {
+      "class_name": "ConvertVideoToGif",
+      "methods": ["convert_video_to_gif"],
+      "system_tools": ["ffmpeg"],
+      "requirements": [],
+      "api_keys": []
+  }
+  ```
+
+TEMPLATE_MAIN: |
+  import importlib
+  import json
+  import pathlib
+
+  from mcp.server.fastmcp import FastMCP
+
+  schema = json.loads(pathlib.Path("manifest.json").read_text())
+
+  cls_module = importlib.import_module("runner")
+  inst = getattr(cls_module, schema["impl_class_name"])()
+
+  mcp = FastMCP(schema["impl_class_name"])
+  for method in schema["impl_methods"]:
+      mcp.add_tool(
+          fn=getattr(inst, method),
+          name=method,
+      )
+
+  if __name__ == "__main__":
+      mcp.run()
+
+
+TEMPLATE_MANIFEST: |
+  {
+      "name": "{{ name }}",
+      "command": ".venv/bin/python",
+      "args": ["main.py"],
+      "transport": "stdio",
+      "impl_fn": "runner.py",
+      "impl_class_name": "{{ class_name }}",
+      "impl_methods": {{ methods }},
+      "impl_requirements": {{ requirements }},
+      "impl_api_keys": {{ api_keys }}
+  }
+
+TEMPLATE_CONFIG: |
+  # @package _global_
+
+  name: {{ name }}
+  mode: mcp
+  activated_tools: null
+  mcp_transport: stdio
+  mcp_client_session_timeout_seconds: 60
+  config:
+    command: .venv/bin/python
+    args: ["main.py"]
+    cwd: configs/tools/generated/{{ name }}

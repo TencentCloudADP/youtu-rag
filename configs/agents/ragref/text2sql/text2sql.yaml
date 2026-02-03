@@ -1,0 +1,20 @@
+# @package _global_
+defaults:
+  - /model/base@planner_model
+  - /agents/ragref/text2sql/sql_executor@workers.Text2sqlAgent
+  - _self_
+
+
+type: orchestra_react_sql
+
+max_turns: 3
+
+planner_config:
+  examples_path: examples/rag/text2sql/react_sql_result.json
+  prompt_path: ragref/text2sql/planner_text2sql.yaml
+
+workers_info:
+  - name: Text2sqlAgent
+    desc: Generate sql statements based on the question and database table information and return the sql results.
+    strengths: sql generation and execution
+    weaknesses: none

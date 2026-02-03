@@ -1,0 +1,14 @@
+# @package _global_
+defaults:
+  - /model/base@planner_model
+  - /model/base@reporter_model
+  - /agents/simple/search_agent@workers.SearchAgent
+  - _self_
+
+type: orchestra
+
+workers_info:
+  - name: SearchAgent
+    desc: information retrieval and data collection.
+    strengths: Web search, information retrieval, research material collection, API data fetching
+    weaknesses: No access to private databases, retrieval only (no content creation/modification)

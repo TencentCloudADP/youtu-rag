@@ -1,0 +1,270 @@
+---
+title: Deploying Youtu Parsing Locally
+---
+
+The following document provides instructions for deploying the Youtu Parsing as a backend service for Youtu-RAG.
+
+**Requirements:**
+- Conda environment with Python 3.10
+- CUDA version 12.x
+- Linux x86_64 operating system
+
+# Installing Youtu Parsing
+
+First create a conda environment and install the required dependencies:
+
+```bash
+conda create -n youtu-parsing python=3.10 -y
+conda activate youtu-parsing
+pip install git+https://github.com/TencentCloudADP/youtu-parsing.git#subdirectory=youtu_hf_parser
+```
+
+# Setting up Flash Attention
+
+Flash attention V2 is **required** for Youtu Parsing to run efficiently. Follow the instructions below to install it:
+
+```bash
+# Install Flash Attention V2 for CUDA 12.x + Python 3.10 + PyTorch 2.6 + Linux x86_64
+pip install https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.4.post1/flash_attn-2.7.4.post1+cu12torch2.6cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+```
+
+> **Note**: Flash Attention installation is platform-specific. If you encounter issues, please refer to the [official installation guide](https://github.com/Dao-AILab/flash-attention).
+
+# Downloading the Youtu Parsing Model Weights
+
+Download the pre-trained model weights from [our official repository](https://huggingface.co/tencent/Youtu-Parsing):
+
+```bash
+git lfs install
+git clone https://huggingface.co/tencent/Youtu-Parsing
+```
+
+
+# Installing dependencies for the server
+Next, install the additional dependencies required to run the Youtu Parsing server:
+
+```bash
+pip install fastapi uvicorn pydantic Pillow
+```
+
+# Running the Youtu Parsing Server
+
+Save the following code as `youtu_parsing_server.py`:
+
+```python
+import base64
+import io
+import os
+import json
+import asyncio
+from contextlib import asynccontextmanager
+from typing import Dict, List
+from PIL import Image
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from youtu_hf_parser import YoutuOCRParserHF as youtu
+
+
+# Global parser instance
+parser = None
+# Lock for serial request processing
+processing_lock = None
+
+
+class ImageRequest(BaseModel):
+    """Request model for receiving base64 encoded image data"""
+    image: str
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifecycle management, initializes parser and lock"""
+    global parser, processing_lock
+
+    # Get parameters from global configuration
+    model_path = os.getenv("YOUTU_PARSING_MODEL_PATH", "Youtu-Parsing")
+    enable_angle_correct = (os.getenv("YOUTU_ENABLE_ANGLE_CORRECT", "true") == "true")
+
+    # Initialize parser
+    print(f"Initializing the parser with model_path={model_path} and enable_angle_correct={enable_angle_correct}...")
+    parser = youtu(model_path, enable_angle_correct=enable_angle_correct)
+    processing_lock = asyncio.Lock()
+
+    print("Parser initialized and ready")
+    yield
+
+    # Clean up resources
+    print("Shutting down server")
+
+
+# Create FastAPI application
+app = FastAPI(title="Youtu OCR Parser Server",
+              description="Server for parsing images with Youtu OCR Parser",
+              lifespan=lifespan)
+
+
+def base64_to_image(base64_str: str) -> Image.Image:
+    """
+    Convert base64 string to PIL Image object
+    
+    Args:
+        base64_str: Base64 encoded image string
+        
+    Returns:
+        PIL Image object
+    """
+    # Remove possible data URI prefix (e.g., data:image/png;base64,)
+    if "," in base64_str:
+        base64_str = base64_str.split(",")[1]
+
+    # Decode base64 data
+    image_data = base64.b64decode(base64_str)
+
+    # Convert to PIL Image
+    image = Image.open(io.BytesIO(image_data))
+
+    return image.convert("RGB")
+
+
+@app.post("/parse")
+@app.post("/")
+async def parse_image(request: ImageRequest) -> JSONResponse:
+    """
+    Parse image and return result
+    
+    This endpoint receives base64 encoded image data, processes it using parser._parse_single_image,
+    and returns the parsing result. Ensures only one image is processed at a time.
+    
+    Args:
+        request: Request containing base64 encoded image
+        
+    Returns:
+        JSONResponse: Response containing parsing result
+    """
+    # Acquire lock to ensure only one request is processed at a time
+    async with processing_lock:
+        try:
+            # Convert base64 string to PIL Image
+            image = base64_to_image(request.image)
+
+            # Call parser._parse_single_image method
+            # Only need the first return value (result), ignore page_angle and hierarchy_json
+            result, _, _ = await asyncio.to_thread(parser._parse_single_image,
+                                                   image)
+
+            # Return result
+            return JSONResponse(content=result)
+
+        except Exception as e:
+            # Catch and return error information
+            # raise e
+            return JSONResponse(status_code=500,
+                                content={
+                                    "status": "error",
+                                    "message": str(e)
+                                })
+
+
+@app.get("/health")
+async def health_check() -> JSONResponse:
+    """Health check endpoint"""
+    return JSONResponse(content={
+        "status": "healthy",
+        "parser_initialized": parser is not None
+    })
+
+
+if __name__ == "__main__":
+    import uvicorn
+    import argparse
+
+    # Create command line argument parser
+    arg_parser = argparse.ArgumentParser(description="Youtu OCR Parser Server")
+
+    # Add configuration parameters
+    arg_parser.add_argument("--host",
+                            type=str,
+                            default="0.0.0.0",
+                            help="Server host address to listen on (default: 0.0.0.0)")
+
+    arg_parser.add_argument("--port",
+                            type=int,
+                            default=8501,
+                            help="Server port to listen on (default: 8501)")
+
+    arg_parser.add_argument("--model_path",
+                            type=str,
+                            default="Youtu-Parsing",
+                            help="Youtu model path (default: Youtu-Parsing)")
+
+    arg_parser.add_argument("--enable_angle_correct",
+                            action="store_true",
+                            default=True,
+                            help="Enable angle correction (default: True)")
+
+    arg_parser.add_argument("--workers",
+                            type=int,
+                            default=1,
+                            help="Number of worker processes (default: 1)")
+
+    # Parse command line arguments
+    args = arg_parser.parse_args()
+
+    # Set global configuration
+    os.environ["YOUTU_PARSING_MODEL_PATH"] = args.model_path
+    os.environ["YOUTU_ENABLE_ANGLE_CORRECT"] = str(args.enable_angle_correct).lower()
+
+    # Output configuration information
+    print(f"Configuration:")
+    print(f"  Host: {args.host}")
+    print(f"  Port: {args.port}")
+    print(f"  Model Path: {args.model_path}")
+    print(f"  Angle Correction: {'Enabled' if args.enable_angle_correct else 'Disabled'}")
+    print(f"  Worker Processes: {args.workers}")
+    print("")
+
+    # Start server
+    uvicorn.run("server:app",
+                host=args.host,
+                port=args.port,
+                reload=False,
+                workers=args.workers)
+```
+
+Now you may run the server with the following command:
+
+```bash
+python youtu_parsing_server.py \
+    --model_path ./Youtu-Parsing \
+    --enable_angle_correct \
+    --port 8501 
+```
+
+# API Endpoints
+
+Once running, the following endpoints are available:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/parse` or `/` | POST | Parse a base64-encoded image |
+| `/health` | GET | Health check endpoint |
+
+## Example Usage
+
+To parse an image, send a POST request with a base64-encoded image:
+
+```bash
+# Encode an image to base64 and send a request
+IMAGE_BASE64=$(base64 -i your_image.png)
+curl -X POST http://localhost:8501/parse \
+    -H "Content-Type: application/json" \
+    -d "{\"image\": \"$IMAGE_BASE64\"}"
+```
+
+Check server health:
+
+```bash
+curl http://localhost:8501/health
+```

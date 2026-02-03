@@ -1,0 +1,56 @@
+FINAL_ANSWER_PROMPT: |
+  I am solving a question:
+  <question>
+  {question}
+  </question>
+
+  Here are the completed subtasks and their results:
+  <task_execution_results>
+  {task_results}
+  </task_execution_results>
+
+  Now, I need you to determine the final answer based on the execution results. Do not try to solve the question from scratch, just extract and format the answer from the provided results.
+
+  Here are the requirements for the final answer:
+  <requirements>
+  The final answer must be output exactly in the format specified by the question. The final answer should be a number OR as few words as possible OR a comma separated list of numbers and/or strings.
+  If you are asked for a number, don't use comma to write your number neither use units such as $ or percent sign unless specified otherwise. Numbers do not need to be written as words, but as digits.
+  If you are asked for a string, don't use articles, neither abbreviations (e.g. for cities), and write the digits in plain text unless specified otherwise. In most times, the final string is as concise as possible (e.g. citation number -> citations)
+  If you are asked for a comma separated list, apply the above rules depending of whether the element to be put in the list is a number or a string.
+  If there is a conflict between the assumptions in the question and the actual facts, prioritize the assumptions stated in the question.
+  </requirements>
+
+  Please analyze the task execution results and output the final answer in the exact format required by the question.
+
+  Output format:
+  <analysis>
+  Analyze the task execution results and identify what the final answer should be based on the question requirements.
+  </analysis>
+  <answer>
+  The final answer in the exact format specified by the question.
+  </answer>
+
+ANSWER_CHECK_PROMPT: |
+  You are an expert evaluator tasked with determining whether two answers have the same semantic meaning, even if they differ in format or wording.
+
+  Question: {question}
+
+  Model Answer: {model_answer}
+  Ground Truth Answer: {ground_truth}
+
+  Please analyze whether these two answers convey the same meaning and would be considered equivalent responses to the question. Consider:
+
+  1. Do they refer to the same entity, number, concept, or result?
+  2. Are any differences merely in formatting, units, or presentation style?
+  3. Do they both correctly answer the question asked?
+  4. Are there any substantive differences in meaning or content?
+
+  Important: Be strict in your evaluation. Only return "yes" if the answers are truly semantically equivalent. Minor formatting differences are acceptable, but different factual content is not.
+
+  Output format:
+  <analysis>
+  Detailed analysis of whether the answers are semantically equivalent, considering the context of the question.
+  </analysis>
+  <equivalent>
+  yes/no
+  </equivalent>

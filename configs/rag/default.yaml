@@ -1,0 +1,55 @@
+# Default RAG Configuration
+
+name: "default_rag"
+description: "Default RAG configuration for Knowledeg Base"
+
+chunking:
+  display_name: "📝 文本分块 (Chunking)"
+  type: "local"  # Options: local, api
+  strategy: "recursive"
+  chunk_size: 1000
+  chunk_overlap: 100
+  keep_separator: true
+  # Note: hierarchical strategy is automatically used for chunklevel.md files. It respects markdown heading structure (# and ##) and preserves sentence boundaries
+
+embedding:
+  display_name: "🔢 向量嵌入 (Embedding)"
+  type: "local"  # Options: local, api
+  model: "${UTU_EMBEDDING_MODEL}"  
+  base_url: "${UTU_EMBEDDING_URL}" 
+  batch_size: 16
+
+# embedding:
+#   display_name: "🔢 向量嵌入 (Embedding)"
+#   type: "api" 
+#   model: "${UTU_EMBEDDING_MODEL}"  
+#   base_url: "${UTU_EMBEDDING_URL}" 
+#   api_key: "${UTU_EMBEDDING_API_KEY}"
+#   batch_size: 16
+
+reranker:
+  display_name: "🎯 重排序 (Reranker)"
+  type: "api"  # Options: local, api
+  enabled: true
+  model: "${UTU_RERANKER_MODEL}"
+  base_url: "${UTU_RERANKER_BASE_URL}"
+  top_k: 5
+
+llm_model:
+  display_name: "🤖 大语言模型 (LLM)" 
+  type: "api"  # Options: local, api
+  model: "${UTU_LLM_MODEL}"  
+  base_url: "${UTU_LLM_BASE_URL}"
+  temperature: 0.7
+
+text2sql:
+  display_name: "🤖 Text2SQL" 
+  column_value_vectorization:
+    strategy: "individual"  # Options: individual, concatenate
+    top_n: 10 
+  # Note: individual: vectorize each value independently, concatenate: concatenate and vectorize. top_n: take top N high-frequency values from each column for vectorization
+
+vector_store:
+  backend: "chroma"
+  persist_directory: "${VECTOR_STORE_PATH}"
+  distance_metric: "cosine"  # Options: cosine, euclidean, dot

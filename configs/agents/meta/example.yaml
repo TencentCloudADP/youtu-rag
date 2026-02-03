@@ -1,0 +1,9 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - /tools/generated/download_bilibili_video@toolkits.download_bilibili_video
+  - _self_
+
+agent:
+  name: test_tool_generator
+  instructions: "You are a helpful assistant."

@@ -1,0 +1,30 @@
+# @package _global_
+defaults:
+  - /model/base@model
+  - _self_
+
+agent:
+    name: mcp_stdio_example
+    instructions: "You are a helpful assistant."
+
+toolkits:
+  time:
+    name: time
+    mode: mcp
+    activated_tools: null
+    mcp_transport: stdio
+    mcp_client_session_timeout_seconds: 20
+    config:
+      command: uvx
+      args: ["mcp-server-time", "--local-timezone=Asia/Shanghai"]
+  memory:
+    name: memory
+    mode: mcp
+    activated_tools: null
+    mcp_transport: stdio
+    mcp_client_session_timeout_seconds: 20
+    config:
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-memory"]
+      env:
+        MEMORY_FILE_PATH: ${oc.env:MCP_MEMORY_FILE_PATH}

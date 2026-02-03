@@ -141,10 +141,10 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>File Upload Example</strong><br>Automatic Metadata extraction and summary generation
+      <strong>文件上传示例</strong><br>自动提取Metadata和摘要生成
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>PDF File Post-Processing Preview</strong><br>Requires OCR configuration support
+      <strong>PDF文件处理后预览</strong><br>需要OCR配置支持
     </td>
   </tr>
   <tr>
@@ -163,10 +163,10 @@ metadata_extraction: # 元数据提取，默认开启
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>PNG File Post-Processing Preview</strong><br>Requires OCR configuration support
+      <strong>PNG文件处理后预览</strong><br>需要OCR配置支持
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>HiChunk Parsing Preview</strong><br>Requires HiChunk configuration support
+      <strong>HiChunk解析预览</strong><br>需要HiChunk配置支持
     </td>
   </tr>
   <tr>
@@ -192,13 +192,13 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>File Batch Deletion and Upload</strong><br>It is recommended to batch import files of the same type at once
+      <strong>文件批量删除和上传</strong><br>建议单次批量导入同类型文件
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>File Metadata Batch Editing</strong><br>Supports batch export, editing, and import
+      <strong>文件Metadata批量编辑</strong><br>支持批量导出、编辑、导入
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>File Search</strong><br>Supports filename, Metadata, summary, etc.
+      <strong>文件搜索</strong><br>支持文件名、Metadata、摘要等
     </td>
   </tr>
   <tr style="height: 320px;">
@@ -237,10 +237,10 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Knowledge Base Creation and Deletion</strong><br>Only supports single knowledge base operation
+      <strong>知识库创建和删除</strong><br>仅支持单个知识库操作
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>Knowledge Base Search</strong><br>Supports knowledge base name and Description search
+      <strong>知识库搜索</strong><br>支持知识库名称、Description搜索
     </td>
   </tr>
   <tr>
@@ -270,13 +270,13 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>File Association</strong><br>Multiple files can be selected for association at once
+      <strong>文件关联</strong><br>单次可多选文件进行关联
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>Database Association</strong><br>Supports Sqlite and MySQL
+      <strong>数据库关联</strong><br>支持Sqlite和MySQL
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>Example Association</strong><br>Supports association of example Q&A pairs
+      <strong>示例关联</strong><br>支持关联示例问答对
     </td>
   </tr>
   <tr>
@@ -301,13 +301,13 @@ metadata_extraction: # 元数据提取，默认开启
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>Knowledge Base Configuration View</strong><br>View association configuration and construction configuration
+      <strong>知识库配置查看</strong><br>查看关联配置和构建配置
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>Knowledge Base Vectorization Construction</strong><br>Unified construction of different types of associated content
+      <strong>知识库向量化构建</strong><br>统一构建不同类型的关联内容
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>Knowledge Base Association Editing</strong><br>Supports editing and updating of associated content
+      <strong>知识库关联编辑</strong><br>支持关联内容的编辑和更新
     </td>
   </tr>
   <tr>
@@ -347,14 +347,14 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>💬 Chat Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Chat Agent</li>
-        <li>It is recommended to enable "Memory" to support multi-turn conversations</li>
+        <li>闲聊 Agent</li>
+        <li>建议开启“记忆”以支持多轮对话</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🔍 Web Search Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Supports web search</li>
-        <li>Can access links to explore detailed content and answer</li>
+        <li>支持网页搜索</li>
+        <li>可访问链接探查详细内容并回答</li>
       </ul>
     </td>
   </tr>
@@ -375,15 +375,15 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📚 KB Search Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Must select knowledge base</li>
-        <li>Supports vector retrieval and reranking</li>
+        <li>必须选择知识库</li>
+        <li>支持向量检索和重排</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📚 Meta Retrieval Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Must select knowledge base</li>
-        <li>Supports vector retrieval and reranking</li>
-        <li>Supports question intent parsing and metadata filtering</li>
+        <li>必须选择知识库</li>
+        <li>支持向量检索和重排</li>
+        <li>支持问题意图解析和元数据过滤</li>
       </ul>
     </td>
   </tr>
@@ -404,17 +404,17 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📄 File QA Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Must select knowledge base and file</li>
-        <li>Supports Python reading and processing file content</li>
-        <li>Supports vector retrieval and reranking</li>
+        <li>必须选择知识库和文件</li>
+        <li>支持Python读取和处理文件内容</li>
+        <li>支持向量检索和重排</li>
       </ul>
     </td>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📊 Excel Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Must select knowledge base and file</li>
-        <li>Question decomposition and data processing step breakdown</li>
-        <li>Python code execution and reflection</li>
+        <li>必须选择知识库和文件</li>
+        <li>问题拆解和数据处理步骤拆解</li>
+        <li>Python代码执行和反思</li>
       </ul>
     </td>
   </tr>
@@ -435,15 +435,15 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>💻 Text2SQL Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Must select knowledge base with associated database</li>
-        <li>Question decomposition and SQL code generation and execution</li>
-        <li>SQL query result display and reflection</li>
+        <li>必须选择已关联数据库的知识库</li>
+        <li>问题拆解与SQL代码生成和执行</li>
+        <li>SQL查询结果展示和反思</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🧠 Short and Long-Term Memory</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Short-term memory: Takes effect within Session, used to support multi-turn conversations</li>
-        <li>Long-term memory: Long-term effectiveness, used to accumulate successful experiences</li>
+        <li>Short-term memory: Session内生效，用于支持多轮对话</li>
+        <li>Long-term memory: 长期生效，用于沉淀成功经验</li>
       </ul>
     </td>
   </tr>
@@ -464,14 +464,14 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🧐 Text2SQL Agent with Memory</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Short-term memory takes effect within Session</li>
-        <li>Long-term memory can avoid additional token consumption for similar questions</li>
+        <li>短期记忆在Session内生效</li>
+        <li>长期记忆可避免相似问题的额外token消耗</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🎯 QA Learning</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Record QA examples</li>
-        <li>Automatically learn Agent routing strategies</li>
+        <li>记录 QA 示例</li>
+        <li>自动学习 Agent 路由策略</li>
       </ul>
     </td>
   </tr>

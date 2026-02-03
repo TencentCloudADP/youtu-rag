@@ -2,7 +2,7 @@
 title: 本地部署
 ---
 
-本文档提供使用 vllm 部署 HiChunk 作为 Youtu-RAG 后端服务的说明，提供分层分块功能。
+本文档提供使用 vllm 部署 Youtu HiChunk 作为 Youtu-RAG 后端服务的说明，提供分层分块功能。
 
 **环境要求：**
 - CUDA version 12.x
@@ -20,7 +20,7 @@ cd Youtu-HiChunk
 ```
 # 设置环境
 
-安装使用 vllm 服务 HiChunk 所需的依赖项
+安装使用 vllm 服务 Youtu HiChunk 所需的依赖项
 
 ```bash
 uv venv hichunk --python 3.12
@@ -1532,9 +1532,9 @@ cp utu_v1.py .venv/lib/python3.12/site-packages/vllm/model_executor/models/
 cp registry.py .venv/lib/python3.12/site-packages/vllm/model_executor/models/
 ```
 
-# 使用 vLLM 服务 HiChunk
+# 使用 vLLM 服务 Youtu HiChunk
 
-运行以下脚本在端口 `8501` 上使用 vLLM 服务 HiChunk 模型：
+运行以下脚本在端口 `8501` 上使用 vLLM 服务 Youtu HiChunk 模型：
 
 ```bash
 vllm serve \
@@ -1551,7 +1551,7 @@ vllm serve \
 
 # API 端点
 
-运行后，HiChunk 通过 OpenAI 兼容的 API 提供服务。可用的端点如下：
+运行后，Youtu HiChunk 通过 OpenAI 兼容的 API 提供服务。可用的端点如下：
 
 | 端点 | 方法 | 描述 |
 |----------|--------|-------------|

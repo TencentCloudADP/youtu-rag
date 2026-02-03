@@ -5,10 +5,10 @@ description: 本地部署和使用 Youtu-RAG 的指南
 
 本文档提供了如何在本地部署和使用 Youtu-RAG 的分步指南。具体包括设置 Youtu Embedding、HiChunk、Youtu Parsing 后端服务，并将它们与 Youtu-RAG 集成。
 
-或者，你也可以考虑在腾讯云 Ti-one 平台上部署后端服务。详情请参见[使用腾讯云 Ti-one 部署](./ti-one)。
+或者，你也可以考虑在腾讯云 Ti-one 平台上部署后端服务。详情请参见[使用腾讯云 Ti-one 部署](/docs/zh/ti-one)。
 
 ## 步骤 1：部署 Youtu Embedding 服务
-按照[本地部署 Youtu Embedding](./youtu-embedding/deploying-locally) 或[使用 Docker 部署 Youtu Embedding](./youtu-embedding/docker-image) 中的说明设置 Youtu Embedding 服务。然后将以下配置添加到你的 `.env` 文件中：
+按照[本地部署 Youtu Embedding](/docs/zh/youtu-embedding/deploying-locally) 或[使用 Docker 部署 Youtu Embedding](/docs/zh/youtu-embedding/docker-image) 中的说明设置 Youtu Embedding 服务。然后将以下配置添加到你的 `.env` 文件中：
 
 ```bash
 # =============================================
@@ -22,7 +22,7 @@ UTU_EMBEDDING_MODEL=youtu-embedding-2B
 ```
 
 ## 步骤 2：部署 Youtu HiChunk 服务
-按照[本地部署 Youtu HiChunk](./hichunk/deploying-locally) 或[使用 Docker 部署 Youtu HiChunk](./hichunk/docker-image) 中的说明设置 Youtu HiChunk 服务。然后将以下配置添加到你的 `.env` 文件中：
+按照[本地部署 Youtu HiChunk](/docs/zh/hichunk/deploying-locally) 或[使用 Docker 部署 Youtu HiChunk](/docs/zh/hichunk/docker-image) 中的说明设置 Youtu HiChunk 服务。然后将以下配置添加到你的 `.env` 文件中：
 
 ```bash
 # =============================================
@@ -43,7 +43,7 @@ chunk:
 ```
 
 ## 步骤 3：部署 Youtu Parsing 服务
-按照[本地部署 Youtu Parsing](./youtu-parsing/deploying-locally) 或[使用 Docker 部署 Youtu Parsing](./youtu-parsing/docker-image) 中的说明设置 Youtu Parsing 服务。然后将以下配置添加到你的 `.env` 文件中：
+按照[本地部署 Youtu Parsing](/docs/zh/youtu-parsing/deploying-locally) 或[使用 Docker 部署 Youtu Parsing](/docs/zh/youtu-parsing/docker-image) 中的说明设置 Youtu Parsing 服务。然后将以下配置添加到你的 `.env` 文件中：
 
 ```bash
 # =============================================

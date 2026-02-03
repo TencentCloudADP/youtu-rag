@@ -139,21 +139,21 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>文件上传示例</strong><br>自动提取Metadata和摘要生成
+      <strong>File Upload Example</strong><br>Automatic Metadata extraction and summary generation
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>PDF文件处理后预览</strong><br>需要OCR配置支持
+      <strong>PDF File Post-Processing Preview</strong><br>Requires OCR configuration support
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/01_upload_file.mp4" 
+      <video src="https://github.com/user-attachments/assets/d8247dc2-f134-46da-9fd1-15c990445011" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/02_pdf_file_example.mp4" 
+      <video src="https://github.com/user-attachments/assets/e5568428-990a-4008-8808-dcbe80cb2757" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -161,21 +161,21 @@ metadata_extraction: # 元数据提取，默认开启
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>PNG文件处理后预览</strong><br>需要OCR配置支持
+      <strong>PNG File Post-Processing Preview</strong><br>Requires OCR configuration support
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>HiChunk解析预览</strong><br>需要HiChunk配置支持
+      <strong>HiChunk Parsing Preview</strong><br>Requires HiChunk configuration support
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/03_png_file_example.mp4" 
+      <video src="https://github.com/user-attachments/assets/7701152f-b55e-46c1-af33-ebafd1b2341e" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/04_hichunk_example.mp4" 
+      <video src="https://github.com/user-attachments/assets/815cd47a-5137-483b-b4e7-f5205d7d0b03" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -190,30 +190,30 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>文件批量删除和上传</strong><br>建议单次批量导入同类型文件
+      <strong>File Batch Deletion and Upload</strong><br>It is recommended to batch import files of the same type at once
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>文件Metadata批量编辑</strong><br>支持批量导出、编辑、导入
+      <strong>File Metadata Batch Editing</strong><br>Supports batch export, editing, and import
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>文件搜索</strong><br>支持文件名、Metadata、摘要等
+      <strong>File Search</strong><br>Supports filename, Metadata, summary, etc.
     </td>
   </tr>
   <tr style="height: 320px;">
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: middle; height: 320px;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/06_batch_delete_upload.mp4" 
+      <video src="https://github.com/user-attachments/assets/60e01dc6-58db-4f8d-bb3d-4a259f34f741" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: middle; height: 320px;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/05_metadata_export_import.mp4" 
+      <video src="https://github.com/user-attachments/assets/30de1091-68d4-4306-99da-e64e9e87329c" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: middle; height: 320px;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/07_file_search.mp4" 
+      <video src="https://github.com/user-attachments/assets/b0bd0b20-0be9-4dbc-9c11-a558229b2e45" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -235,21 +235,21 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>知识库创建和删除</strong><br>仅支持单个知识库操作
+      <strong>Knowledge Base Creation and Deletion</strong><br>Only supports single knowledge base operation
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <strong>知识库搜索</strong><br>支持知识库名称、Description搜索
+      <strong>Knowledge Base Search</strong><br>Supports knowledge base name and Description search
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/08_kb_create_delete.mp4" 
+      <video src="https://github.com/user-attachments/assets/162ef8e4-ae3f-44dd-8389-9bbdb9640bc2" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/09_kb_search.mp4" 
+      <video src="https://github.com/user-attachments/assets/9fafc311-6333-4759-844e-47ba1054a66a" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -268,68 +268,67 @@ metadata_extraction: # 元数据提取，默认开启
 <table>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>文件关联</strong><br>单次可多选文件进行关联
+      <strong>File Association</strong><br>Multiple files can be selected for association at once
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>数据库关联</strong><br>支持Sqlite和MySQL
+      <strong>Database Association</strong><br>Supports Sqlite and MySQL
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>示例关联</strong><br>支持关联示例问答对
-    </td>
-  </tr>
-  <tr>
-    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/10_kb_file_association.mp4" 
-             controls muted preload="metadata" 
-             width="100%" 
-             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/11_kb_db_association.mp4" 
-             controls muted preload="metadata" 
-             width="100%" 
-             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
-    </td>
-    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/12_kb_qa_example.mp4" 
-             controls muted preload="metadata" 
-             width="100%" 
-             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
+      <strong>Example Association</strong><br>Supports association of example Q&A pairs
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>知识库配置查看</strong><br>查看关联配置和构建配置
+      <video src="https://github.com/user-attachments/assets/ae1d0bb9-080f-4813-b9f0-32c30cf2e84c" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>知识库向量化构建</strong><br>统一构建不同类型的关联内容
+      <video src="https://github.com/user-attachments/assets/f9d013e6-3e8f-46a6-95ac-43b66bb389f0" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <strong>知识库关联编辑</strong><br>支持关联内容的编辑和更新
+      <video src="https://github.com/user-attachments/assets/404cbdc9-a053-423c-859a-4f28c3fbabfb" 
+             controls muted preload="metadata" 
+             width="100%" 
+             style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/13_kb_config_show.mp4" 
+      <strong>Knowledge Base Configuration View</strong><br>View association configuration and construction configuration
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>Knowledge Base Vectorization Construction</strong><br>Unified construction of different types of associated content
+    </td>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <strong>Knowledge Base Association Editing</strong><br>Supports editing and updating of associated content
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
+      <video src="https://github.com/user-attachments/assets/500b3b31-42c6-491a-846f-e6b23ad19dc4" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/14_kb_build.mp4" 
+      <video src="https://github.com/user-attachments/assets/69118200-2f94-4d89-945c-1d20aac4d2a6" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 33%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/15_kb_modify.mp4" 
+      <video src="https://github.com/user-attachments/assets/d7f96a7a-2c6c-488d-93b8-ddc93eaf662f" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
   </tr>
 </table>
-
 
 ### 3️⃣ 智能对话
 
@@ -346,26 +345,26 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>💬 Chat Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>闲聊 Agent</li>
-        <li>建议开启“记忆”以支持多轮对话</li>
+        <li>Chat Agent</li>
+        <li>It is recommended to enable "Memory" to support multi-turn conversations</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🔍 Web Search Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>支持网页搜索</li>
-        <li>可访问链接探查详细内容并回答</li>
+        <li>Supports web search</li>
+        <li>Can access links to explore detailed content and answer</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/16_chat_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/f65b6989-1af8-4304-b5b9-95fdd1cb217e" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/17_websearch_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/e16935de-0e1b-4b46-922b-32d588c58939" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -374,27 +373,27 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📚 KB Search Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>必须选择知识库</li>
-        <li>支持向量检索和重排</li>
+        <li>Must select knowledge base</li>
+        <li>Supports vector retrieval and reranking</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📚 Meta Retrieval Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>必须选择知识库</li>
-        <li>支持向量检索和重排</li>
-        <li>支持问题意图解析和元数据过滤</li>
+        <li>Must select knowledge base</li>
+        <li>Supports vector retrieval and reranking</li>
+        <li>Supports question intent parsing and metadata filtering</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/18_kbsearch_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/33d7d44c-289f-47fe-881b-ceb237932218" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/19_meta_retrieval_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/e3ffbddd-4638-4e94-8112-38458c847a83" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -403,29 +402,29 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📄 File QA Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>必须选择知识库和文件</li>
-        <li>支持Python读取和处理文件内容</li>
-        <li>支持向量检索和重排</li>
+        <li>Must select knowledge base and file</li>
+        <li>Supports Python reading and processing file content</li>
+        <li>Supports vector retrieval and reranking</li>
       </ul>
     </td>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>📊 Excel Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>必须选择知识库和文件</li>
-        <li>问题拆解和数据处理步骤拆解</li>
-        <li>Python代码执行和反思</li>
+        <li>Must select knowledge base and file</li>
+        <li>Question decomposition and data processing step breakdown</li>
+        <li>Python code execution and reflection</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/20_file_qa_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/0d1d3b35-4fad-4122-aafc-3209c4cd6efd" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/22_excel_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/da9be8d8-fdd8-4481-91bd-fe08c3a6bbdb" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -434,27 +433,27 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>💻 Text2SQL Agent</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>必须选择已关联数据库的知识库</li>
-        <li>问题拆解与SQL代码生成和执行</li>
-        <li>SQL查询结果展示和反思</li>
+        <li>Must select knowledge base with associated database</li>
+        <li>Question decomposition and SQL code generation and execution</li>
+        <li>SQL query result display and reflection</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🧠 Short and Long-Term Memory</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>Short-term memory: Session内生效，用于支持多轮对话</li>
-        <li>Long-term memory: 长期生效，用于沉淀成功经验</li>
+        <li>Short-term memory: Takes effect within Session, used to support multi-turn conversations</li>
+        <li>Long-term memory: Long-term effectiveness, used to accumulate successful experiences</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/21_text2sql_agent.mp4" 
+      <video src="https://github.com/user-attachments/assets/30fff32d-066b-4f0b-a444-7e9b9e3932fa" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/23_memory_chat_2.mp4" 
+      <video src="https://github.com/user-attachments/assets/fd98f130-7d8d-457e-96a5-1cf43c8daf81" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
@@ -463,32 +462,33 @@ metadata_extraction: # 元数据提取，默认开启
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🧐 Text2SQL Agent with Memory</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>短期记忆在Session内生效</li>
-        <li>长期记忆可避免相似问题的额外token消耗</li>
+        <li>Short-term memory takes effect within Session</li>
+        <li>Long-term memory can avoid additional token consumption for similar questions</li>
       </ul>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
       <strong>🎯 QA Learning</strong><ul style="margin: 5px 0 0 0; padding-left: 20px;">
-        <li>记录 QA 示例</li>
-        <li>自动学习 Agent 路由策略</li>
+        <li>Record QA examples</li>
+        <li>Automatically learn Agent routing strategies</li>
       </ul>
     </td>
   </tr>
   <tr>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/25_text2sql_memory.mp4" 
+      <video src="https://github.com/user-attachments/assets/93403424-82e8-4cc9-b035-bec977822a1f" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
     <td style="border: 1px solid black; padding: 10px; width: 50%; vertical-align: top;">
-      <video src="https://github.com/miraclefish/Youtu-RAG-User-Guide/releases/download/v1.0.0/26_qa_learning.mp4" 
+      <video src="https://github.com/user-attachments/assets/59d74642-5d0b-4f00-acd0-d2d346035348" 
              controls muted preload="metadata" 
              width="100%" 
              style="height: 100%; max-height: 300px; object-fit: cover; border-radius: 8px; display: block;"></video>
     </td>
   </tr>
 </table>
+
 
 ## 🚀 快速开始
 

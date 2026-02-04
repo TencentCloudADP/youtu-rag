@@ -24,7 +24,7 @@ export function baseOptions(locale: string): BaseLayoutProps {
           />
         </div>
       ),
-      url: '/about.html'
+      url: '/'
     }
   };
 }

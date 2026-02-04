@@ -1002,8 +1002,8 @@
 
     // Initialize i18n
     document.addEventListener('DOMContentLoaded', () => {
-      // Get current language from localStorage (use same key as i18n.js)
-      let currentLang = localStorage.getItem('app_language') || 'zh';
+      // Get current language from localStorage (default to English)
+      let currentLang = localStorage.getItem('app_language') || 'en';
       
       // Apply translations
       updatePageLanguage(currentLang);

@@ -3,7 +3,7 @@
 class Router {
   constructor() {
     this.routes = {
-      '/': 'pages/file-management.html',
+      '/': 'pages/chat.html',
       '/files': 'pages/file-management.html',
       '/knowledge': 'pages/knowledge-base.html',
       '/chat': 'pages/chat.html'
@@ -31,7 +31,7 @@ class Router {
   }
 
   async handleRoute() {
-    const hash = window.location.hash.slice(1) || '/';
+    const hash = window.location.hash.slice(1) || '/chat';
 
     // Check static routes first
     let route = this.routes[hash];

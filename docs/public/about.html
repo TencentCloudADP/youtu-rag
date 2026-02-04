@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About - Youtu-RAG</title>
+  <title>Youtu-RAG</title>
 
   <!-- Stylesheets -->
   <link rel="stylesheet" href="/assets/css/reset.css">
@@ -373,26 +373,228 @@
     @media (max-width: 768px) {
       .top-navbar {
         padding: 0 16px;
+        height: 56px;
       }
 
       .navbar-logo h1 {
         display: none;
       }
 
+      .navbar-logo img {
+        width: 28px;
+        height: 28px;
+      }
+
       .nav-link span {
         display: none;
       }
 
+      .nav-link {
+        padding: 6px 12px;
+      }
+
+      .lang-toggle-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        margin-left: 4px;
+      }
+
       .page-content {
+        margin-top: 56px;
         padding: 16px;
       }
 
       .glass-card {
-        padding: 24px;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 16px;
       }
 
       .feature-card {
-        padding: 24px;
+        padding: 20px;
+      }
+
+      /* Hero Section Mobile */
+      .agent-badge {
+        padding: 10px 16px;
+        font-size: 12px;
+        margin-bottom: 12px;
+      }
+
+      .glass-card h1 {
+        font-size: 36px !important;
+        margin: 16px 0 12px !important;
+      }
+
+      .glass-card p[style*="font-size: 28px"] {
+        font-size: 18px !important;
+        letter-spacing: 1px !important;
+      }
+
+      .glass-card p[style*="font-size: 18px"] {
+        font-size: 15px !important;
+        padding: 0 8px;
+      }
+
+      /* Version Info Mobile */
+      .glass-card > div[style*="margin-top: 32px"] {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+      }
+
+      .glass-card > div[style*="margin-top: 32px"] span:not([data-i18n]) {
+        display: none !important;
+      }
+
+      /* Features Grid Mobile */
+      .glass-card > div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      .icon-box {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+        margin-bottom: 16px;
+      }
+
+      .icon-box img {
+        width: 48px !important;
+        height: 48px !important;
+      }
+
+      /* Stats Carousel Mobile */
+      .stats-carousel-wrapper {
+        margin: 20px 0;
+      }
+
+      .stat-item {
+        flex-direction: column !important;
+        padding: 24px 20px !important;
+        gap: 24px !important;
+        min-height: auto !important;
+      }
+
+      .stat-content {
+        flex: none !important;
+        padding-right: 0 !important;
+        text-align: center;
+        gap: 12px !important;
+      }
+
+      .stat-number {
+        font-size: 56px !important;
+      }
+
+      .stat-label {
+        font-size: 20px !important;
+      }
+
+      .stat-visual {
+        padding-left: 0 !important;
+        border-left: none !important;
+        border-top: 2px solid rgba(139, 92, 246, 0.15);
+        padding-top: 20px;
+        width: 100%;
+      }
+
+      .stat-visual-item {
+        font-size: 13px;
+        padding: 10px 12px;
+      }
+
+      .stat-visual-item-icon {
+        font-size: 16px;
+      }
+
+      /* Carousel Indicators Mobile */
+      .carousel-indicators {
+        gap: 8px;
+        margin-top: 24px;
+      }
+
+      .carousel-indicator {
+        width: 24px;
+        height: 6px;
+      }
+
+      .carousel-indicator.active {
+        width: 36px;
+        height: 6px;
+      }
+
+      /* Core Features Title Mobile */
+      .glass-card h2 {
+        font-size: 24px !important;
+        margin-bottom: 16px !important;
+      }
+
+      .glass-card h2 + p {
+        font-size: 14px !important;
+        margin-bottom: 24px !important;
+      }
+
+      /* Benchmark Section Mobile */
+      .glass-card > div[style*="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"] {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      .glass-card > div[style*="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))"] > div {
+        padding: 20px !important;
+      }
+
+      /* Tech Stack Mobile */
+      .highlight-box {
+        padding: 16px;
+        margin: 20px 0;
+      }
+
+      .highlight-box > div {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      .highlight-box h4 {
+        font-size: 15px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .highlight-box ul {
+        font-size: 13px !important;
+        line-height: 1.8 !important;
+      }
+
+      /* Open Source Section Mobile */
+      .glass-card[style*="text-align: center"] > div[style*="flex-wrap: wrap"] {
+        gap: 8px !important;
+      }
+
+      .glass-card[style*="text-align: center"] > div[style*="flex-wrap: wrap"] a {
+        padding: 8px 16px !important;
+        font-size: 12px !important;
+      }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 480px) {
+      .glass-card h1 {
+        font-size: 28px !important;
+      }
+
+      .stat-number {
+        font-size: 48px !important;
+      }
+
+      .stat-label {
+        font-size: 18px !important;
+      }
+
+      .feature-card h3 {
+        font-size: 18px !important;
       }
     }
   </style>
@@ -502,12 +704,12 @@
             </h3>
           </div>
           <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 16px;" data-i18n="about_feature_adaptive_desc">
-            自主决策最优检索策略。支持向量检索、数据库检索、元数据过滤等多种模式。
+            自主决策最优检索策略，支持网络搜索、向量检索、元数据过滤、数据库查询、代码执行等丰富的工具调用。
           </p>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_vector_search">向量检索</span>
-            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_sql_query">SQL查询</span>
-            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_metadata_filter">元数据过滤</span>
+            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_adaptive_search">自主决策</span>
+            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_tool_call">工具调用</span>
+            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_diverse_data_sources">多样化数据源</span>
           </div>
         </div>
 
@@ -542,12 +744,12 @@
             </h3>
           </div>
           <p style="font-size: 14px; color: #64748b; line-height: 1.6; margin-bottom: 16px;" data-i18n="about_feature_ready_agents_desc">
-            从简单对话到复杂编排，覆盖多种应用级场景。支持Web Search、KB Search、Meta Retrieval、Excel Research、Text2SQL等8+智能体。
+            从简单对话到复杂编排，覆盖多种应用级场景。支持Web Search、KB Search、Meta Retrieval、Excel Agent、Text2SQL等8+智能体。
           </p>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_structured_search">结构化检索</span>
-            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_reading_comprehension">阅读理解</span>
-            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_metadata_retrieval">元数据检索</span>
+            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_ready_to_use">开箱即用</span>
+            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_diverse_scenarios">多样化场景</span>
+            <span style="background: #f1f5f9; padding: 6px 12px; border-radius: 6px; font-size: 12px; color: #475569;" data-i18n="about_tag_task_coordination">复杂任务协同</span>
           </div>
         </div>
 

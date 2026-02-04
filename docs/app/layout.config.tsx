@@ -1,7 +1,6 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { i18n } from '@/lib/i18n';
-import Image from 'next/image';
-import { getAssetPath } from '@/lib/utils';
+import { LogoLink } from '@/components/logo-link';
 
 /**
  * Shared layout configurations
@@ -14,17 +13,8 @@ export function baseOptions(locale: string): BaseLayoutProps {
   return {
     i18n,
     nav: {
-      title: (
-        <div className="logo-container">
-          <Image
-            src={getAssetPath("/assets/youtu-rag-logo.png")}
-            alt="Youtu-RAG"
-            fill
-            className="logo-image"
-          />
-        </div>
-      ),
-      url: '/'
+      title: <LogoLink />,
+      url: '/about.html'
     }
   };
 }

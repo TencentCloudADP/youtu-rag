@@ -33,6 +33,10 @@
 
 传统 RAG 系统遵循"离线切块-向量检索-拼接生成"的固定流程，长期面临**隐私风险、记忆缺失与检索僵化**等核心瓶颈。Youtu-RAG 旨在将系统从被动的检索工具升级为**具备自主决策与记忆学习能力的智能检索增强生成系统**。
 
+<p align="center" style="margin-top: 40px;">
+  <img src="docs/assets/Youtu-RAG.png" alt="Youtu-RAG Architecture" width="100%">
+</p>
+
 <a id="核心特性"></a>
 ## ✨ 核心特性
 
@@ -101,9 +105,6 @@
 </tr>
 </table>
 
-<p align="center" style="margin-top: 40px;">
-  <img src="docs/assets/Youtu-RAG.png" alt="Youtu-RAG Architecture" width="100%">
-</p>
 
 <a id="使用示例"></a>
 ## 📖 使用示例

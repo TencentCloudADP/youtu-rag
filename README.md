@@ -33,6 +33,11 @@ English | [简体中文](README_ZH.md)
 
 Traditional RAG systems follow a fixed pipeline of "offline chunking - vector retrieval - concatenation generation," facing core bottlenecks such as **privacy risks, memory loss, and rigid retrieval**. Youtu-RAG aims to upgrade the system from a passive retrieval tool to an **intelligent retrieval-augmented generation system with autonomous decision and memory learning capabilities**.
 
+<p align="center" style="margin-top: 40px;">
+  <img src="docs/assets/Youtu-RAG.png" alt="Youtu-RAG Architecture" width="100%">
+</p>
+
+
 <a id="key-features"></a>
 ## ✨ Key Features
 
@@ -101,9 +106,6 @@ All related components support local deployment, data stays within domain. Integ
 </tr>
 </table>
 
-<p align="center" style="margin-top: 40px;">
-  <img src="docs/assets/Youtu-RAG.png" alt="Youtu-RAG Architecture" width="100%">
-</p>
 
 <a id="usage-examples"></a>
 ## 📖 Usage Examples

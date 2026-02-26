@@ -46,7 +46,7 @@ def get_memory_toolkit():
             _memory_toolkit = VectorMemoryToolkit(
                 persist_directory=settings.memory_store_path,
                 collection_prefix="rag_chat",
-                default_user_id="web_user",
+                default_user_id="default_user",
                 max_working_memory_turns=20,
             )
             logger.info("✓ Initialized global VectorMemoryToolkit")

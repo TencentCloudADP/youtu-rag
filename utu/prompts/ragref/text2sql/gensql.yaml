@@ -15,5 +15,5 @@ sql_generate_prompt: |
 
   Database Table Information:
   {table_info}
-
+  {few_shot_examples}
   Question: {query}

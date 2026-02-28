@@ -124,7 +124,8 @@ function renderQAList() {
 
   container.innerHTML = pageItems.map((qa) => {
     const isChecked = selectedQAForBatchExecute.has(qa.id);
-    const statusBadge = renderLearningStatusBadge(qa.learning_status);
+    const learningStatusBadge = renderLearningStatusBadge(qa.learning_status);
+    const memoryStatusBadge = renderMemoryStatusBadge(qa.memory_status);
 
     // Safely handle answer field (may be null)
     const answerText = qa.answer || '';
@@ -147,8 +148,11 @@ function renderQAList() {
             ${escapeHtml(answerPreview)}
           </div>
         </div>
-        <div style="width: 150px; display: flex; justify-content: center; align-items: center;">
-          ${statusBadge}
+        <div style="width: 120px; display: flex; justify-content: center; align-items: center;">
+          ${learningStatusBadge}
+        </div>
+        <div style="width: 120px; display: flex; justify-content: center; align-items: center;">
+          ${memoryStatusBadge}
         </div>
         <div style="width: 150px; display: flex; justify-content: center; align-items: center; font-size: 13px; color: var(--gray-7);">
           ${formatDateTime(qa.updated_at)}
@@ -183,7 +187,8 @@ function updateQAListHeader() {
         <input type="checkbox" id="select-all-qa-checkbox" onchange="toggleSelectAllQACurrentPage(this.checked)">
       </div>
       <div style="flex: 1; min-width: 0;" data-i18n="question">${t('question')}</div>
-      <div style="width: 150px; text-align: center;" data-i18n="learning_status">${t('learning_status')}</div>
+      <div style="width: 120px; text-align: center;" data-i18n="learning_status">${t('learning_status')}</div>
+      <div style="width: 120px; text-align: center;" data-i18n="memory_status">${t('memory_status')}</div>
       <div style="width: 150px; text-align: center;" data-i18n="updated_at">${t('updated_at')}</div>
       <div style="width: 100px; text-align: center;" data-i18n="actions">${t('actions')}</div>
     `;
@@ -192,7 +197,8 @@ function updateQAListHeader() {
     headerElement.innerHTML = `
       <div style="width: 40px; text-align: center;">#</div>
       <div style="flex: 1; min-width: 0;" data-i18n="question">${t('question')}</div>
-      <div style="width: 150px; text-align: center;" data-i18n="learning_status">${t('learning_status')}</div>
+      <div style="width: 120px; text-align: center;" data-i18n="learning_status">${t('learning_status')}</div>
+      <div style="width: 120px; text-align: center;" data-i18n="memory_status">${t('memory_status')}</div>
       <div style="width: 150px; text-align: center;" data-i18n="updated_at">${t('updated_at')}</div>
       <div style="width: 100px; text-align: center;" data-i18n="actions">${t('actions')}</div>
     `;
@@ -205,6 +211,19 @@ function renderLearningStatusBadge(status) {
     pending: { color: 'var(--gray-5)', bg: 'var(--gray-2)', text: t('status_pending') },
     learning: { color: 'var(--warning)', bg: '#fef3c7', text: t('status_learning') },
     completed: { color: 'var(--success)', bg: '#d1fae5', text: t('status_completed') },
+    failed: { color: 'var(--error)', bg: '#fee2e2', text: t('status_failed') }
+  };
+
+  const config = statusConfig[status] || statusConfig.pending;
+  return `<span class="badge" style="background-color: ${config.bg}; color: ${config.color};">${config.text}</span>`;
+}
+
+// Render memory status badge
+function renderMemoryStatusBadge(status) {
+  const statusConfig = {
+    pending: { color: 'var(--gray-5)', bg: 'var(--gray-2)', text: t('status_pending') },
+    memorizing: { color: 'var(--warning)', bg: '#fef3c7', text: t('status_memorizing') },
+    memorized: { color: 'var(--success)', bg: '#d1fae5', text: t('status_memorized') },
     failed: { color: 'var(--error)', bg: '#fee2e2', text: t('status_failed') }
   };
 
@@ -328,6 +347,7 @@ function showQADetailModal(qaId) {
   document.getElementById('modal-source-file').textContent = qa.source_file || '-';
   document.getElementById('modal-created-at').textContent = formatDateTime(qa.created_at);
   document.getElementById('modal-learning-status').innerHTML = renderLearningStatusBadge(qa.learning_status);
+  document.getElementById('modal-memory-status').innerHTML = renderMemoryStatusBadge(qa.memory_status);
   document.getElementById('modal-updated-at').textContent = formatDateTime(qa.updated_at);
 
   document.getElementById('qa-detail-modal').style.display = 'flex';

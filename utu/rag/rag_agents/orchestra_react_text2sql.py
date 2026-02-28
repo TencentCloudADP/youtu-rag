@@ -137,7 +137,8 @@ No relevant database tables found. Please ensure:
 
             database_dialect = "MySql" if db_type == "mysql" else "Sqlite"  # Excel tables use SQLite backend
 
-            sql_prompt = self.get_prompt(database_dialect, tables_str, question, db_id, table_names)
+            few_shot_examples = getattr(task_recorder, '_few_shot_examples', [])
+            sql_prompt = self.get_prompt(database_dialect, tables_str, question, db_id, table_names, few_shot_examples)
 
             self._display_schema_details(db_type, db_id, table_names, sql_prompt,task_recorder)
 
@@ -215,7 +216,7 @@ No relevant database tables found. Please ensure:
             print(e)
             return str(e)
 
-    def get_prompt(self, database_dialect, table_info, query, db_id=None, table_names=None):
+    def get_prompt(self, database_dialect, table_info, query, db_id=None, table_names=None, few_shot_examples=None):
         sqlite_syntax_rules = """    - **Identifier Quotes**: ALWAYS use double quotes (") for table names and column names
     - **Example**: SELECT "column_name" FROM "table_name" WHERE "id" = 1
     - **Special characters**: Table/column names with Chinese characters, spaces, or special symbols MUST be quoted
@@ -230,11 +231,20 @@ No relevant database tables found. Please ensure:
 
         syntax_rules = sqlite_syntax_rules if database_dialect == "Sqlite" else mysql_syntax_rules
 
+        if few_shot_examples:
+            examples_text = "\n\n## Reference Examples from Memory:\n"
+            for i, example in enumerate(few_shot_examples, 1):
+                examples_text += f"\n### Example {i}:\n{example}\n"
+            few_shot_block = examples_text + "\n"
+        else:
+            few_shot_block = ""
+
         generate_sql_prompt = (
             self.prompts["sql_generate_prompt"]
             .replace("{database_dialect}", database_dialect)
             .replace("{syntax_rules}", syntax_rules)
             .replace("{table_info}", table_info)
+            .replace("{few_shot_examples}", few_shot_block)
             .replace("{query}", query)
         )
 
@@ -423,7 +433,7 @@ class OrchestraReactSqlAgent:
         logger.info(f"[OrchestraReactSqlAgent] use_memory from env: {use_memory}")
         logger.info(f"[OrchestraReactSqlAgent] self._memory_toolkit: {self._memory_toolkit}")
 
-        original_question = task_recorder.task 
+        original_question = task_recorder.task
         if use_memory and self._memory_toolkit:
             logger.info(f"[Text2SQL] use_memory: {use_memory}")
 
@@ -431,7 +441,7 @@ class OrchestraReactSqlAgent:
                 query=original_question,
                 include_skills=True,  # Text2SQL agent supports skills
             )
-            
+
             working_context = memory_contexts["working_context"]
             episodic_context = memory_contexts["episodic_context"]
             semantic_context = memory_contexts["semantic_context"]
@@ -443,6 +453,28 @@ class OrchestraReactSqlAgent:
                 enhanced_task = f"# 相关历史上下文\n{memory_context}\n\n---\n# 当前问题\n{original_question}"
                 task_recorder.task = enhanced_task
                 logger.info("Injected memory context into Text2SQL task")
+
+            # Query episodic memory for few-shot SQL examples
+            try:
+                episodic_results = await self._memory_toolkit.search_memories(
+                    query=original_question,
+                    memory_type="episodic",
+                    top_k=5,
+                    include_outdated=True,
+                )
+                logger.info(f"[Text2SQL] Episodic memory search returned {len(episodic_results)} results")
+                few_shot_examples = []
+                for mem in episodic_results:
+                    content = mem.memory.content if hasattr(mem, 'memory') else str(mem)
+                    content_lower = content.lower()
+                    logger.info(f"[Text2SQL] content_lower {content_lower}")
+                    if "select" in content_lower and "howtofind" in content_lower:
+                        few_shot_examples.append(content)
+                task_recorder._few_shot_examples = few_shot_examples
+                logger.info(f"[Text2SQL] Found {len(few_shot_examples)} few-shot examples from episodic memory")
+            except Exception as e:
+                logger.warning(f"[Text2SQL] Failed to retrieve few-shot examples: {e}")
+                task_recorder._few_shot_examples = []
 
         with trace(workflow_name="orchestrareactsql_agent", trace_id=task_recorder.trace_id):
             try:

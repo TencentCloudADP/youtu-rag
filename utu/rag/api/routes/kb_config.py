@@ -14,10 +14,6 @@ from ..models.kb_config import (
     DBConnectionTestResponse,
 )
 from ..services.kb_config_service import KBConfigService
-from ..config import settings
-
-from ....config import ConfigLoader
-from ....tools.memory_toolkit import VectorMemoryToolkit
 
 
 logger = logging.getLogger(__name__)
@@ -136,85 +132,6 @@ async def validate_qa_file(filename: str):
     """
     try:
         result = await KBConfigService.validate_qa_file(filename)
-        # ----------------- 新增逻辑 Start: 存储到 Working Memory -----------------
-        # 只有当校验成功 (valid=True) 时，才尝试读取数据并存储
-        if result.get("valid"):
-            try:
-                # 注意：Service 没有直接返回所有行的数据，只返回了 sample_data。
-                # 所以要实现存储，我们必须在这里再次读取 Excel 文件，或者修改 Service 让它返回所有数据。
-                # 这种重复读取在大文件时效率较低，但为了不修改 Service 接口，我们先这样做。
-                
-                # --- 为了读取数据，我们需要重新下载一次文件 (或者依赖 Service 的修改) ---
-                # 但更安全的做法是：既然 Service 返回了 valid=True，我们就利用它。
-                # 这里为了简单起见，我们只能复用 Service 里的部分逻辑或者重新读取。
-                
-                # 最佳实践：这里应该调用另一个 Service 方法 `import_qa_to_memory`，
-                # 但既然要在路由层做，我们只能在这里写。
-                
-                import os
-                import io
-                import openpyxl
-                from ..minio_client import MinIOClient 
-                
-                # 初始化 MinIO (复用环境变量)
-                minio_client = MinIOClient(
-                    endpoint=os.getenv("MINIO_ENDPOINT", "localhost:9000"),
-                    access_key=os.getenv("MINIO_ACCESS_KEY", "minioadmin"),
-                    secret_key=os.getenv("MINIO_SECRET_KEY", "minioadmin"),
-                    bucket_name=os.getenv("MINIO_BUCKET", "rag-documents"),
-                    secure=os.getenv("MINIO_SECURE", "false").lower() == "true"
-                )
-                
-                file_data = minio_client.download_file(filename)
-                if file_data:
-                    wb = openpyxl.load_workbook(io.BytesIO(file_data.read()))
-                    if "example" in wb.sheetnames:
-                        sheet = wb["example"]
-                        # 简单的标头定位 (假设已经 validate 过了)
-                        headers = [str(c.value).lower().strip() for c in sheet[1]]
-                        q_idx = headers.index("question")
-                        a_idx = headers.index("answer")
-                        h_idx = headers.index("howtofind") if "howtofind" in headers else -1
-                        
-                        # # 初始化 Memory
-                        # agent_config = ConfigLoader.load_agent_config("simple/chat")
-                        # memory_toolkit = VectorMemoryToolkit(config=agent_config)
-                        memory_toolkit = VectorMemoryToolkit(
-                            persist_directory=settings.memory_store_path,
-                            collection_prefix="rag_chat",
-                            default_user_id="default_user",
-                            max_working_memory_turns=10000,
-                        )
-
-                        logger.info(f"💾 [Auto-Import] Starting to import {sheet.max_row - 1} rows to memory...")
-                        
-                        count = 0
-                        for row_idx in range(2, sheet.max_row + 1):
-                            row = sheet[row_idx]
-                            q = row[q_idx].value
-                            a = row[a_idx].value
-                            h = row[h_idx].value if h_idx >= 0 else None
-                            
-                            if q and a:
-                                lines = [f"Question: {str(q).strip()}", f"Answer: {str(a).strip()}"]
-                                if h:
-                                    lines.append(f"HowToFind: {str(h).strip()}")
-                                    
-                                # await memory_toolkit.store_working_memory("\n".join(lines), role="assistant")
-                                await memory_toolkit.save_conversation_to_episodic(
-                                    question=str(q).strip(),
-                                    answer=str(a).strip(),
-                                    importance_score=0.5, 
-                                )
-                                count += 1
-                        
-                        logger.info(f"✅ [Auto-Import] Successfully imported {count} items.")
-
-            except Exception as e:
-                # 仅记录日志，不影响校验结果返回给前端
-                logger.error(f"❌ Failed to auto-import QA to memory: {str(e)}")
-
-        
         return QAValidationResult(**result)
     except Exception as e:
         logger.error(f"Validation error: {str(e)}")

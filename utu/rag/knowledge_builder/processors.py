@@ -1562,6 +1562,7 @@ class QAProcessor(BaseProcessor):
                     howtofind TEXT,
                     source_file TEXT,  -- 来源文件名
                     learning_status TEXT DEFAULT 'pending',  -- 学习状态: pending, learning, completed, failed
+                    memory_status TEXT DEFAULT 'pending',  -- 记忆状态: pending, memorized, failed
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )

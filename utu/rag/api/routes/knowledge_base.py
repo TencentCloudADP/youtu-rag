@@ -1,5 +1,6 @@
 """Knowledge base management routes"""
 import logging
+import os
 import uuid
 import yaml
 from datetime import datetime
@@ -424,7 +425,7 @@ async def get_qa_associations(
             cursor = conn.execute(
                 """
                 SELECT qa_id, kb_id, question, answer, howtofind, source_file,
-                       learning_status, created_at, updated_at
+                       learning_status, memory_status, created_at, updated_at
                 FROM qa_associations
                 WHERE kb_id = ? AND source_file = ?
                 ORDER BY qa_id
@@ -444,6 +445,7 @@ async def get_qa_associations(
                     "howtofind": row["howtofind"],
                     "source_file": row["source_file"],
                     "learning_status": row["learning_status"] or "pending",
+                    "memory_status": row["memory_status"] or "pending",
                     "created_at": row["created_at"],
                     "updated_at": row["updated_at"]
                 })
@@ -612,6 +614,58 @@ async def execute_qa(
                 (final_status, qa_id, kb_id)
             )
             conn.commit()
+
+            env_memory_enabled = os.environ.get("memoryEnabled", "false").lower() == "true"
+            if env_memory_enabled:
+                has_answer = expected_answer and expected_answer.strip()
+                has_howtofind = howtofind and howtofind.strip()
+
+                if has_answer:
+                    try:
+                        from ..config import settings
+                        from ....tools.memory_toolkit import VectorMemoryToolkit
+
+                        memory_toolkit = VectorMemoryToolkit(
+                            persist_directory=settings.memory_store_path,
+                            collection_prefix="rag_chat",
+                            default_user_id="default_user",
+                            max_working_memory_turns=10000,
+                        )
+                        if has_howtofind:
+                            memory_answer = f"answer: {expected_answer.strip()}\nhowtofind: {howtofind.strip()}"
+                        else:
+                            memory_answer = f"answer: {expected_answer.strip()}"
+
+                        await memory_toolkit.save_conversation_to_episodic(
+                            question=question.strip(),
+                            answer=memory_answer,
+                            importance_score=0.5,
+                        )
+
+                        conn.execute(
+                            """
+                            UPDATE qa_associations
+                            SET memory_status = 'memorized', updated_at = CURRENT_TIMESTAMP
+                            WHERE qa_id = ? AND kb_id = ?
+                            """,
+                            (qa_id, kb_id)
+                        )
+                        conn.commit()
+                        logger.info(f"💾 [QA Execute] Saved QA {qa_id} to memory")
+                    except Exception as e:
+                        # Update memory_status to failed
+                        conn.execute(
+                            """
+                            UPDATE qa_associations
+                            SET memory_status = 'failed', updated_at = CURRENT_TIMESTAMP
+                            WHERE qa_id = ? AND kb_id = ?
+                            """,
+                            (qa_id, kb_id)
+                        )
+                        conn.commit()
+                        logger.error(f"❌ Failed to save QA {qa_id} to memory: {str(e)}")
+                else:
+                    logger.warning(f"⚠️ [QA Execute] QA {qa_id} missing expected_answer or howtofind, skipped memory storage")
 
             return {
                 "message": "QA executed successfully",

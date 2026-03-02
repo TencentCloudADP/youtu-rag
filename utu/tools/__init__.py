@@ -19,7 +19,7 @@ from .video_toolkit import VideoToolkit
 from .wikipedia_toolkit import WikipediaSearchTool
 
 # Import RAG-specific toolkits from rag module
-from ..rag.rag_tools import KBSearchToolkit, FileToolkit, MetaRetrievalToolkit
+from ..rag.rag_tools import KBSearchToolkit, FileToolkit, MetaRetrievalToolkit, HTMLToolkit
 
 TOOLKIT_MAP: dict[str, type[AsyncBaseToolkit]] = {
     "search": SearchToolkit,
@@ -41,6 +41,7 @@ TOOLKIT_MAP: dict[str, type[AsyncBaseToolkit]] = {
     "kb_search": KBSearchToolkit,
     "file_toolkit": FileToolkit,
     "meta_retrieval": MetaRetrievalToolkit,
+    "html_toolkit": HTMLToolkit,
 }
 
 

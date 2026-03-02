@@ -2117,11 +2117,207 @@ function setupMarkdownRenderer() {
   if (typeof marked !== 'undefined') {
     // Configure marked if available
     marked.setOptions({
-      breaks: true,
-      gfm: true
+      breaks: true,        // 支持换行
+      gfm: true,          // GitHub Flavored Markdown
+      headerIds: true,    // 为标题添加 ID
+      mangle: false,      // 不混淆邮箱地址
+      sanitize: false,    // 允许 HTML（谨慎使用）
+      smartLists: true,   // 智能列表
+      smartypants: false, // 不转换引号
+      xhtml: false        // 不使用 XHTML 标签
     });
+    
+    // 自定义渲染器（可选）
+    const renderer = new marked.Renderer();
+    
+    // 自定义链接渲染：增强文件链接样式
+    renderer.link = function(href, title, text) {
+      const isExternal = href.startsWith('http://') || href.startsWith('https://');
+      const isFileLink = href.startsWith('file://') || 
+                        href.match(/\.(md|html|pdf|xlsx?|csv|docx?|txt|png|jpe?g|gif)(\?|$)/i);
+      
+      const titleAttr = title ? ` title="${title}"` : '';
+      
+      // 文件链接：添加特殊样式和下载功能
+      if (isFileLink) {
+        const fileName = text || href.split('/').pop().split('?')[0];
+        // 添加 file-link 类用于特殊样式
+        // 添加 onclick 处理文件下载/打开
+        return `<a href="${href}" class="file-link"${titleAttr} onclick="handleFileLinkClick(event, '${href.replace(/'/g, "\\'")}', '${fileName.replace(/'/g, "\\'")}')">${text}</a>`;
+      }
+      
+      // 外部链接：在新标签页打开
+      if (isExternal) {
+        return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+      }
+      
+      // 普通链接
+      return `<a href="${href}"${titleAttr}>${text}</a>`;
+    };
+    
+    // 自定义图片渲染：处理本地文件路径
+    renderer.image = function(href, title, text) {
+      const titleAttr = title ? ` title="${title}"` : '';
+      const altAttr = text ? ` alt="${text}"` : '';
+      
+      // 检查是否是本地文件路径（绝对路径）
+      const isLocalFile = href.startsWith('/') || href.startsWith('file://');
+      
+      let imageSrc = href;
+      
+      // 如果是本地文件，使用代理接口
+      if (isLocalFile) {
+        // 移除 file:// 协议头
+        let localPath = href.replace(/^file:\/\//, '');
+        // 对路径进行 URL 编码
+        imageSrc = `${API_BASE}/api/local-file-proxy?path=${encodeURIComponent(localPath)}`;
+      }
+      
+      // 返回图片标签，包含加载失败处理和预览功能
+      return `<img src="${imageSrc}"${altAttr}${titleAttr} 
+        class="markdown-image" 
+        style="max-width: 100%; height: auto; border-radius: 4px; cursor: pointer;" 
+        onclick="previewImage('${imageSrc.replace(/'/g, "\\'")}', '${(text || '').replace(/'/g, "\\'")}')"
+        onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<div class=image-load-error>🖼️ <span>图片加载失败</span><br><small>${escapeHtml(href)}</small></div>')">`;
+    };
+    
+    marked.use({ renderer });
   }
 }
+
+/**
+ * 处理文件链接点击事件
+ */
+window.handleFileLinkClick = function(event, href, fileName) {
+  event.preventDefault();
+  
+  // 移除 file:// 协议头，获取实际路径
+  let filePath = href.replace(/^file:\/\//, '');
+  
+  // 处理 Windows 路径（file:///C:/... -> C:/...）
+  if (filePath.match(/^\/[A-Z]:\//)) {
+    filePath = filePath.substring(1);
+  }
+  
+  console.log('File link clicked:', filePath);
+  
+  // 尝试多种方式打开文件
+  tryOpenFile(filePath, fileName);
+};
+
+/**
+ * 尝试打开/下载文件
+ */
+function tryOpenFile(filePath, fileName) {
+  // 方法1: 尝试在新窗口打开（适用于 HTML 等）
+  const fileUrl = `file://${filePath}`;
+  const newWindow = window.open(fileUrl, '_blank');
+  
+  // 检查是否被浏览器拦截
+  if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+    // 方法2: 提示用户手动操作
+    showFileAccessDialog(filePath, fileName);
+  } else {
+    // 成功打开
+    showToast(`正在打开文件: ${fileName}`, 'success');
+    
+    // 检查是否真的打开成功（延迟检查）
+    setTimeout(() => {
+      if (newWindow.closed) {
+        showFileAccessDialog(filePath, fileName);
+      }
+    }, 500);
+  }
+}
+
+/**
+ * 显示文件访问对话框
+ */
+function showFileAccessDialog(filePath, fileName) {
+  const dialog = document.createElement('div');
+  dialog.className = 'file-access-dialog';
+  dialog.innerHTML = `
+    <div class="file-access-overlay" onclick="this.parentElement.remove()"></div>
+    <div class="file-access-content">
+      <div class="file-access-header">
+        <span class="file-access-icon">📁</span>
+        <h3>文件访问</h3>
+      </div>
+      <div class="file-access-body">
+        <p class="file-access-name">📄 ${escapeHtml(fileName)}</p>
+        <p class="file-access-tip">由于浏览器安全限制，无法直接打开本地文件。</p>
+        <p class="file-access-path-label">文件路径：</p>
+        <div class="file-access-path">
+          <code id="file-path-text">${escapeHtml(filePath)}</code>
+          <button class="file-access-copy-btn" onclick="copyFilePath('${filePath.replace(/'/g, "\\'")}')">
+            📋 复制路径
+          </button>
+        </div>
+        <div class="file-access-instructions">
+          <p><strong>打开方式：</strong></p>
+          <ol>
+            <li>点击上方"复制路径"按钮</li>
+            <li>在文件管理器（访达/资源管理器）中粘贴路径并打开</li>
+            <li>或使用命令行：<code>open "${filePath}"</code></li>
+          </ol>
+        </div>
+      </div>
+      <div class="file-access-footer">
+        <button class="btn btn-primary" onclick="this.closest('.file-access-dialog').remove()">
+          知道了
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(dialog);
+}
+
+/**
+ * 复制文件路径
+ */
+window.copyFilePath = function(filePath) {
+  navigator.clipboard.writeText(filePath).then(() => {
+    showToast('✅ 路径已复制到剪贴板', 'success');
+  }).catch(() => {
+    // 降级方案
+    const textarea = document.createElement('textarea');
+    textarea.value = filePath;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    showToast('✅ 路径已复制到剪贴板', 'success');
+  });
+};
+
+/**
+ * 预览图片（点击放大）
+ */
+window.previewImage = function(src, alt) {
+  const overlay = document.createElement('div');
+  overlay.className = 'image-preview-overlay';
+  overlay.innerHTML = `
+    <div class="image-preview-container" onclick="event.stopPropagation()">
+      <div class="image-preview-header">
+        <span class="image-preview-title">${escapeHtml(alt || '图片预览')}</span>
+        <button class="image-preview-close" onclick="this.closest('.image-preview-overlay').remove()">✕</button>
+      </div>
+      <div class="image-preview-content">
+        <img src="${src}" alt="${escapeHtml(alt || '')}" class="image-preview-img">
+      </div>
+    </div>
+  `;
+  
+  // 点击遮罩关闭
+  overlay.onclick = function() {
+    overlay.remove();
+  };
+  
+  document.body.appendChild(overlay);
+};
 
 // Handle file attachment
 function handleFileAttachment(files) {

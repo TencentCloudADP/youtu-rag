@@ -1,0 +1,15 @@
+name: html_toolkit
+mode: builtin
+activated_tools: null
+
+config:
+  # 模板文件路径（相对于项目根目录）
+  template_path: configs/agents/ragref/excel_analysis/html_template.yaml
+
+  # 模版类型
+  html_template: default
+
+  # html_designer prompt
+  html_designer_sp: html_designer_sp
+  html_designer_up: html_designer_up
+  

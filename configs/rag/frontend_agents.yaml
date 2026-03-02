@@ -37,6 +37,12 @@ agents:
     config_path: "ragref/excel/excel.yaml"
     icon: "📊"
 
+  - name: "Excel Deep Analysis"
+    description: "Excel表格深度分析Agent"
+    agent_object: "OrchestratorAgent"
+    config_path: "ragref/excel_analysis/base.yaml"
+    icon: "📈"
+
   - name: "Text2SQL"
     description: "文本转SQL Agent"
     agent_object: "OrchestraReactSqlAgent"

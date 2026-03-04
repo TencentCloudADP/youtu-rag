@@ -187,7 +187,7 @@ const translations = {
     processing: '处理中...',
     upload_complete: '上传完成！',
     remove: '移除',
-    copy_content: '复制内容',
+    copy_content: '复制',
     current_kb: '当前知识库',
 
     // Chat - File Upload
@@ -519,7 +519,7 @@ const translations = {
     processing: 'Processing...',
     upload_complete: 'Upload complete!',
     remove: 'Remove',
-    copy_content: 'Copy content',
+    copy_content: 'Copy',
     current_kb: 'Current knowledge base',
 
     // Chat - File Upload

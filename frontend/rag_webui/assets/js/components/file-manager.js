@@ -69,6 +69,9 @@ function initFileManagement() {
   updateTimeSortOrder = 'desc';
   updateSortIndicators();
 
+  // Setup Markdown renderer with local file proxy support
+  setupMarkdownRenderer();
+
   loadFileList();
 
   // Add metadata import input change listener
@@ -1512,6 +1515,9 @@ function closeFileContentSidebar() {
   const overlay = document.getElementById('sidebar-overlay');
 
   if (sidebar) {
+    // 清理 Markdown 切换按钮（使用共享函数）
+    cleanupMarkdownToggleButton('#file-content-sidebar');
+    
     sidebar.classList.remove('show');
     setTimeout(() => sidebar.style.display = 'none', 300);
   }
@@ -1686,79 +1692,11 @@ async function loadFileContent(filename) {
         `;
       }
     } else if (fileExt === 'xlsx' || fileExt === 'xls') {
-      // Display Excel file as table
-      try {
-        const arrayBuffer = await blob.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-
-        // Get first sheet
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-
-        // Limit rows to prevent performance issues
-        const MAX_ROWS = 3000;
-        let rowLimitWarning = '';
-        if (worksheet['!ref']) {
-          const range = XLSX.utils.decode_range(worksheet['!ref']);
-          const totalRows = range.e.r + 1;
-          if (totalRows > MAX_ROWS) {
-            range.e.r = MAX_ROWS - 1;
-            worksheet['!ref'] = XLSX.utils.encode_range(range);
-            rowLimitWarning = `
-              <div class="excel-row-limit-warning" style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background-color: var(--warning-bg, #fff3cd); border-left: 3px solid var(--warning, #ffc107); border-radius: var(--radius-md);">
-                <span style="color: var(--warning-dark, #856404); font-size: var(--font-size-sm);">⚠️ Too many rows, showing only first ${MAX_ROWS} rows (total ${totalRows} rows)</span>
-              </div>
-            `;
-          }
-        }
-
-        // Convert to HTML table
-        const htmlTable = XLSX.utils.sheet_to_html(worksheet);
-
-        // Show sheet selector if multiple sheets
-        let sheetSelector = '';
-        if (workbook.SheetNames.length > 1) {
-          sheetSelector = `
-            <div style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background-color: var(--gray-2); border-radius: var(--radius-md);">
-              <label style="font-weight: 600; margin-right: var(--spacing-sm); color: var(--gray-9);">Worksheet:</label>
-              <select id="sheet-selector" onchange="switchExcelSheet(this.value)" style="padding: 6px 12px; border: 1px solid var(--gray-4); border-radius: var(--radius-sm); background-color: white; cursor: pointer; font-size: var(--font-size-sm);">
-                ${workbook.SheetNames.map((name, idx) =>
-                  `<option value="${idx}" ${idx === 0 ? 'selected' : ''}>${escapeHtml(name)}</option>`
-                ).join('')}
-              </select>
-              <span style="margin-left: var(--spacing-sm); color: var(--gray-7); font-size: var(--font-size-sm);">Total ${workbook.SheetNames.length} worksheet(s)</span>
-            </div>
-          `;
-        } else {
-          // Show single sheet name
-          sheetSelector = `
-            <div style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background-color: var(--gray-2); border-radius: var(--radius-md);">
-              <span style="font-weight: 600; color: var(--gray-9);">Worksheet: </span>
-              <span style="color: var(--gray-8);">${escapeHtml(firstSheetName)}</span>
-            </div>
-          `;
-        }
-
-        // Store workbook data for sheet switching
-        window._currentWorkbook = workbook;
-
-        displayElement.innerHTML = `
-          ${sheetSelector}
-          ${rowLimitWarning}
-          <div class="excel-table-container">
-            ${htmlTable.replace('<table', '<table class="excel-table"')}
-          </div>
-        `;
-      } catch (error) {
-        console.error('Excel parsing error:', error);
-        displayElement.innerHTML = `
-          <div class="file-type-notice">
-            <div class="icon">❌</div>
-            <h3>Excel File Parsing Failed</h3>
-            <p style="margin-top: var(--spacing-md); color: var(--error);">${error.message}</p>
-          </div>
-        `;
-      }
+      // Display Excel file using common utility function
+      await window.renderExcelInContainer(blob, displayElement, {
+        maxRows: 3000,
+        showSheetSelector: true
+      });
     } else if (fileExt === 'docx') {
       // Display DOCX file
       try {
@@ -1799,10 +1737,16 @@ async function loadFileContent(filename) {
           </button>
         </div>
       `;
-    } else if (['txt', 'md', 'json', 'xml', 'csv', 'log', 'py', 'js', 'html', 'css'].includes(fileExt)) {
+    } else if (['txt', 'md', 'json', 'xml', 'csv', 'log', 'py', 'js', 'html', 'css', 'yaml', 'yml'].includes(fileExt)) {
       // Display text content
       const text = await blob.text();
-      displayElement.innerHTML = `<pre style="background-color: var(--gray-2); padding: var(--spacing-md); border-radius: var(--radius-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>`;
+      
+      // Markdown 文件特殊处理 - 支持代码/渲染视图切换
+      if (fileExt === 'md') {
+        renderMarkdownWithToggle(displayElement, text, filename, '#file-content-sidebar');
+      } else {
+        displayElement.innerHTML = `<pre style="background-color: var(--gray-2); padding: var(--spacing-md); border-radius: var(--radius-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>`;
+      }
     } else {
       // Unknown file type
       displayElement.innerHTML = `
@@ -1834,65 +1778,7 @@ async function loadFileContent(filename) {
   }
 }
 
-// Switch Excel sheet viewer
-function switchExcelSheet(sheetIndex) {
-  const displayElement = document.getElementById('sidebar-content-display');
-
-  if (!window._currentWorkbook) {
-    console.error('No workbook data available');
-    return;
-  }
-
-  try {
-    const workbook = window._currentWorkbook;
-    const sheetName = workbook.SheetNames[sheetIndex];
-    const worksheet = workbook.Sheets[sheetName];
-
-    // Limit rows to prevent performance issues
-    const MAX_ROWS = 3000;
-    let rowLimitWarning = '';
-    if (worksheet['!ref']) {
-      const range = XLSX.utils.decode_range(worksheet['!ref']);
-      const totalRows = range.e.r + 1;
-      if (totalRows > MAX_ROWS) {
-        range.e.r = MAX_ROWS - 1;
-        worksheet['!ref'] = XLSX.utils.encode_range(range);
-        rowLimitWarning = `
-          <div class="excel-row-limit-warning" style="margin-bottom: var(--spacing-md); padding: var(--spacing-sm); background-color: var(--warning-bg, #fff3cd); border-left: 3px solid var(--warning, #ffc107); border-radius: var(--radius-md);">
-            <span style="color: var(--warning-dark, #856404); font-size: var(--font-size-sm);">⚠️ 数据行数过多，仅显示前 ${MAX_ROWS} 行（共 ${totalRows} 行）</span>
-          </div>
-        `;
-      }
-    }
-
-    // Convert to HTML table
-    const htmlTable = XLSX.utils.sheet_to_html(worksheet);
-
-    // Update the warning message
-    const existingWarning = displayElement.querySelector('.excel-row-limit-warning');
-    if (existingWarning) {
-      if (rowLimitWarning) {
-        existingWarning.outerHTML = rowLimitWarning;
-      } else {
-        existingWarning.remove();
-      }
-    } else if (rowLimitWarning) {
-      const sheetSelector = displayElement.querySelector('.excel-table-container');
-      if (sheetSelector) {
-        sheetSelector.insertAdjacentHTML('beforebegin', rowLimitWarning);
-      }
-    }
-
-    // Update only the table container
-    const tableContainer = displayElement.querySelector('.excel-table-container');
-    if (tableContainer) {
-      tableContainer.innerHTML = htmlTable.replace('<table', '<table class="excel-table"');
-    }
-  } catch (error) {
-    console.error('Sheet switching error:', error);
-    showToast('Failed to switch worksheet: ' + error.message, 'error');
-  }
-}
+// Note: switchExcelSheet function is now defined in utils.js as window.switchExcelSheet
 
 // Toggle update time sort order
 function toggleUpdateTimeSort() {

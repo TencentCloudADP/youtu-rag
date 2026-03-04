@@ -605,6 +605,9 @@ async function initChat() {
   // New: Initialize Memory switch
   initMemorySwitch();
 
+  // Restore chat history from localStorage
+  restoreChatHistory();
+
   // Setup agent change listener
   const agentSelect = document.getElementById('agent-select');
   if (agentSelect) {
@@ -625,6 +628,8 @@ async function initChat() {
     if (kbSelect && kbSelect.value) {
       loadKnowledgeBaseFiles(kbSelect.value);
     }
+    // Update all copy button titles
+    updateCopyButtonTitles();
   });
 }
 
@@ -1073,6 +1078,9 @@ function stopAgent() {
       `;
       messagesContainer.appendChild(interruptDiv);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      
+      // Save chat history after adding interruption message
+      saveChatHistory();
     }
 
     showToast(t('toast_execution_stopped'), 'info');
@@ -1105,9 +1113,11 @@ function addMessage(role, content) {
     <div class="message-content">
       <div class="message-bubble">
         <div class="message-text">${role === 'assistant' ? renderMarkdown(content) : escapeHtml(content)}</div>
-        ${copyButton}
       </div>
-      <div class="message-time">${time}</div>
+      <div class="message-footer">
+        ${copyButton}
+        <div class="message-time">${time}</div>
+      </div>
     </div>
   `;
 
@@ -1118,6 +1128,9 @@ function addMessage(role, content) {
 
   // Update clear history button state
   updateClearButtonState();
+
+  // Save chat history to localStorage
+  saveChatHistory();
 }
 
 // Stream chat response with intermediate steps
@@ -1527,7 +1540,7 @@ function handleDeltaParallel(event) {
     updateCardContent(
       parallelAgentCards[event.agent_name].output,
       parallelAgentCards[event.agent_name].outputContent,
-      'markdown'
+      'text'
     );
   }
 }
@@ -1555,7 +1568,7 @@ function handleDeltaNormal(event) {
       outputContent = '';
     }
     outputContent += event.content;
-    updateCardContent(currentOutputCard, outputContent, 'markdown');
+    updateCardContent(currentOutputCard, outputContent, 'text');
   }
 }
 
@@ -2046,7 +2059,21 @@ function addFinalAnswerBubble(content) {
   messageDiv.className = 'message assistant final-answer';
 
   const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-  const htmlContent = renderMarkdown(content);
+  
+  // Render markdown and wrap in a container with custom class for styling control
+  const markdownHtml = renderMarkdown(content);
+  
+  // Create a temporary container to parse and modify the HTML
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = markdownHtml;
+  
+  // Remove inline max-width style from images to allow CSS control
+  const images = tempDiv.querySelectorAll('img');
+  images.forEach(img => {
+    img.style.maxWidth = '';
+  });
+  
+  const htmlContent = `<div class="final-answer-markdown">${tempDiv.innerHTML}</div>`;
 
   // Build timestamp HTML, show if total time exists
   let timestampHtml = `<div class="message-time">${time}`;
@@ -2062,9 +2089,11 @@ function addFinalAnswerBubble(content) {
     <div class="message-content">
       <div class="message-bubble">
         <div class="message-text">${htmlContent}</div>
-        <button class="copy-btn" onclick="copyMessageContent(this)" title="${t('copy_content')}">📋</button>
       </div>
-      ${timestampHtml}
+      <div class="message-footer">
+        <button class="copy-btn" onclick="copyMessageContent(this)" title="${t('copy_content')}">📋</button>
+        ${timestampHtml}
+      </div>
     </div>
   `;
 
@@ -2078,117 +2107,15 @@ function addFinalAnswerBubble(content) {
 
   // Update clear history button state
   updateClearButtonState();
-}
 
-// Markdown renderer (uses marked.js if available)
-function renderMarkdown(text) {
-  if (!text) return '';
-
-  // Use marked.js if available
-  if (typeof marked !== 'undefined') {
-    try {
-      return `<div class="markdown-content">${marked.parse(text)}</div>`;
-    } catch (error) {
-      console.error('Markdown parsing error:', error);
-    }
-  }
-
-  // Fallback: Simple implementation
-  let html = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  html = html.replace(/```(.*?)```/gs, '<pre><code>$1</code></pre>');
-  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-  html = html.replace(/\n/g, '<br>');
-
-  return `<div class="markdown-content">${html}</div>`;
-}
-
-// Setup Markdown renderer (can be enhanced with marked.js)
-function setupMarkdownRenderer() {
-  // Check if marked.js is available
-  if (typeof marked !== 'undefined') {
-    // Configure marked if available
-    marked.setOptions({
-      breaks: true,        // 支持换行
-      gfm: true,          // GitHub Flavored Markdown
-      headerIds: true,    // 为标题添加 ID
-      mangle: false,      // 不混淆邮箱地址
-      sanitize: false,    // 允许 HTML（谨慎使用）
-      smartLists: true,   // 智能列表
-      smartypants: false, // 不转换引号
-      xhtml: false        // 不使用 XHTML 标签
-    });
-    
-    // 自定义渲染器（可选）
-    const renderer = new marked.Renderer();
-    
-    // 自定义链接渲染：增强文件链接样式
-    renderer.link = function(href, title, text) {
-      const isExternal = href.startsWith('http://') || href.startsWith('https://');
-      const isFileLink = href.startsWith('file://') || 
-                        href.match(/\.(md|html|pdf|xlsx?|csv|docx?|txt|png|jpe?g|gif)(\?|$)/i);
-      
-      const titleAttr = title ? ` title="${title}"` : '';
-      
-      // 文件链接：添加特殊样式和下载功能
-      if (isFileLink) {
-        const fileName = text || href.split('/').pop().split('?')[0];
-        // 添加 file-link 类用于特殊样式
-        // 添加 onclick 处理文件下载/打开
-        return `<a href="${href}" class="file-link"${titleAttr} onclick="handleFileLinkClick(event, '${href.replace(/'/g, "\\'")}', '${fileName.replace(/'/g, "\\'")}')">${text}</a>`;
-      }
-      
-      // 外部链接：在新标签页打开
-      if (isExternal) {
-        return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
-      }
-      
-      // 普通链接
-      return `<a href="${href}"${titleAttr}>${text}</a>`;
-    };
-    
-    // 自定义图片渲染：处理本地文件路径
-    renderer.image = function(href, title, text) {
-      const titleAttr = title ? ` title="${title}"` : '';
-      const altAttr = text ? ` alt="${text}"` : '';
-      
-      // 检查是否是本地文件路径（绝对路径）
-      const isLocalFile = href.startsWith('/') || href.startsWith('file://');
-      
-      let imageSrc = href;
-      
-      // 如果是本地文件，使用代理接口
-      if (isLocalFile) {
-        // 移除 file:// 协议头
-        let localPath = href.replace(/^file:\/\//, '');
-        // 对路径进行 URL 编码
-        imageSrc = `${API_BASE}/api/local-file-proxy?path=${encodeURIComponent(localPath)}`;
-      }
-      
-      // 返回图片标签，包含加载失败处理和预览功能
-      return `<img src="${imageSrc}"${altAttr}${titleAttr} 
-        class="markdown-image" 
-        style="max-width: 100%; height: auto; border-radius: 4px; cursor: pointer;" 
-        onclick="previewImage('${imageSrc.replace(/'/g, "\\'")}', '${(text || '').replace(/'/g, "\\'")}')"
-        onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<div class=image-load-error>🖼️ <span>图片加载失败</span><br><small>${escapeHtml(href)}</small></div>')">`;
-    };
-    
-    marked.use({ renderer });
-  }
+  // Save chat history to localStorage
+  saveChatHistory();
 }
 
 /**
- * 处理文件链接点击事件
+ * 处理聊天中的文件链接点击事件（非 HTML 文件）
  */
-window.handleFileLinkClick = function(event, href, fileName) {
+window.handleChatFileLinkClick = function(event, href, fileName) {
   event.preventDefault();
   
   // 移除 file:// 协议头，获取实际路径
@@ -2199,125 +2126,303 @@ window.handleFileLinkClick = function(event, href, fileName) {
     filePath = filePath.substring(1);
   }
   
-  console.log('File link clicked:', filePath);
+  console.log('Chat file link clicked:', filePath);
   
-  // 尝试多种方式打开文件
-  tryOpenFile(filePath, fileName);
+  // 在聊天侧边栏预览文件
+  openChatFileSidebar(filePath, fileName);
 };
 
 /**
- * 尝试打开/下载文件
+ * 打开聊天文件预览侧边栏
  */
-function tryOpenFile(filePath, fileName) {
-  // 方法1: 尝试在新窗口打开（适用于 HTML 等）
-  const fileUrl = `file://${filePath}`;
-  const newWindow = window.open(fileUrl, '_blank');
+function openChatFileSidebar(filePath, fileName) {
+  // 检查或创建侧边栏
+  let sidebar = document.getElementById('chat-file-sidebar');
+  let overlay = document.getElementById('chat-sidebar-overlay');
   
-  // 检查是否被浏览器拦截
-  if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-    // 方法2: 提示用户手动操作
-    showFileAccessDialog(filePath, fileName);
-  } else {
-    // 成功打开
-    showToast(`正在打开文件: ${fileName}`, 'success');
+  if (!sidebar) {
+    // 创建侧边栏和遮罩
+    const sidebarHtml = `
+      <div id="chat-sidebar-overlay" class="sidebar-overlay" style="display: none;" onclick="closeChatFileSidebar()"></div>
+      <div id="chat-file-sidebar" class="file-content-sidebar" style="display: none;">
+        <div class="sidebar-header">
+          <h3 class="sidebar-title" id="chat-sidebar-filename">文件预览</h3>
+          <div class="sidebar-header-actions">
+            <!-- Markdown toggle button will be inserted here if needed -->
+            <button class="btn btn-small btn-secondary" id="chat-sidebar-download" onclick="downloadChatSidebarFile()" title="Download" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <button class="sidebar-close" onclick="closeChatFileSidebar()">&times;</button>
+          </div>
+        </div>
+        <div class="sidebar-body">
+          <div id="chat-sidebar-loading" style="text-align: center; padding: 48px;">
+            <div class="spinner spinner-large" style="margin: 0 auto;"></div>
+            <p style="margin-top: 16px; color: var(--gray-7);">加载文件内容...</p>
+          </div>
+          <div id="chat-sidebar-display" style="display: none;">
+            <!-- File content will be displayed here -->
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', sidebarHtml);
     
-    // 检查是否真的打开成功（延迟检查）
+    sidebar = document.getElementById('chat-file-sidebar');
+    overlay = document.getElementById('chat-sidebar-overlay');
+  }
+  
+  const titleElement = document.getElementById('chat-sidebar-filename');
+  const loadingElement = document.getElementById('chat-sidebar-loading');
+  const displayElement = document.getElementById('chat-sidebar-display');
+  
+  // 设置文件名
+  if (titleElement) {
+    titleElement.textContent = fileName;
+  }
+  
+  // 显示侧边栏和遮罩
+  if (sidebar) {
+    sidebar.style.display = 'flex';
+    setTimeout(() => sidebar.classList.add('show'), 10);
+  }
+  if (overlay) {
+    overlay.style.display = 'block';
+    setTimeout(() => overlay.classList.add('show'), 10);
+  }
+  
+  // 重置内容
+  if (loadingElement) loadingElement.style.display = 'block';
+  if (displayElement) {
+    displayElement.style.display = 'none';
+    displayElement.innerHTML = '';
+  }
+  
+  // 加载文件内容
+  loadChatFileContent(filePath, fileName);
+}
+
+/**
+ * 关闭聊天文件预览侧边栏
+ */
+window.closeChatFileSidebar = function() {
+  const sidebar = document.getElementById('chat-file-sidebar');
+  const overlay = document.getElementById('chat-sidebar-overlay');
+  const downloadBtn = document.getElementById('chat-sidebar-download');
+  
+  if (sidebar) {
+    // 清理 Markdown 切换按钮（使用共享函数）
+    cleanupMarkdownToggleButton('#chat-file-sidebar');
+    
+    sidebar.classList.remove('show');
+    setTimeout(() => sidebar.style.display = 'none', 300);
+  }
+  if (overlay) {
+    overlay.classList.remove('show');
+    setTimeout(() => overlay.style.display = 'none', 300);
+  }
+  
+  // 隐藏下载按钮并清理存储的文件数据
+  if (downloadBtn) {
+    downloadBtn.style.display = 'none';
+  }
+  window._chatSidebarFileBlob = null;
+  window._chatSidebarFileName = null;
+};
+
+/**
+ * 下载聊天侧边栏中的当前文件
+ */
+window.downloadChatSidebarFile = function() {
+  if (!window._chatSidebarFileBlob || !window._chatSidebarFileName) {
+    console.error('No file data available for download');
+    return;
+  }
+  
+  try {
+    // 创建下载链接
+    const url = URL.createObjectURL(window._chatSidebarFileBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = window._chatSidebarFileName;
+    document.body.appendChild(a);
+    a.click();
+    
+    // 清理
     setTimeout(() => {
-      if (newWindow.closed) {
-        showFileAccessDialog(filePath, fileName);
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  } catch (error) {
+    console.error('Download failed:', error);
+  }
+};
+
+/**
+ * 加载聊天文件内容（通过本地文件代理）
+ */
+async function loadChatFileContent(filePath, fileName) {
+  const loadingElement = document.getElementById('chat-sidebar-loading');
+  const displayElement = document.getElementById('chat-sidebar-display');
+  const downloadBtn = document.getElementById('chat-sidebar-download');
+  
+  try {
+    // 使用本地文件代理 API
+    const response = await fetch(`${API_BASE}/api/local-file-proxy?path=${encodeURIComponent(filePath)}`);
+    
+    if (!response.ok) {
+      throw new Error(`加载失败: ${response.statusText}`);
+    }
+    
+    const blob = await response.blob();
+    const fileExt = fileName.split('.').pop().toLowerCase();
+    
+    // 存储当前文件的 blob 和文件名，供下载使用
+    window._chatSidebarFileBlob = blob;
+    window._chatSidebarFileName = fileName;
+    
+    // 显示下载按钮
+    if (downloadBtn) {
+      downloadBtn.style.display = 'flex';
+    }
+    
+    if (loadingElement) loadingElement.style.display = 'none';
+    if (displayElement) displayElement.style.display = 'block';
+    
+    // 根据文件类型渲染内容
+    if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(fileExt)) {
+      // 图片文件
+      const imageUrl = URL.createObjectURL(blob);
+      displayElement.innerHTML = `
+        <div style="text-align: center; padding: var(--spacing-md);">
+          <img src="${imageUrl}" alt="${escapeHtml(fileName)}" style="max-width: 100%; height: auto; border-radius: var(--radius-md);">
+        </div>
+      `;
+    } else if (fileExt === 'pdf') {
+      // PDF 文件（需要 pdf.js 库）
+      if (typeof pdfjsLib !== 'undefined') {
+        await renderPdfInSidebar(blob, displayElement);
+      } else {
+        displayElement.innerHTML = `
+          <div class="file-type-notice">
+            <div class="icon">📄</div>
+            <h3>PDF 文件</h3>
+            <p>PDF.js 库未加载，无法预览</p>
+          </div>
+        `;
       }
-    }, 500);
+    } else if (['xlsx', 'xls'].includes(fileExt)) {
+      // Excel 文件
+      if (typeof XLSX !== 'undefined') {
+        await renderExcelInSidebar(blob, displayElement);
+      } else {
+        displayElement.innerHTML = `
+          <div class="file-type-notice">
+            <div class="icon">📊</div>
+            <h3>Excel 文件</h3>
+            <p>XLSX.js 库未加载，无法预览</p>
+          </div>
+        `;
+      }
+    } else if (['txt', 'md', 'json', 'xml', 'csv', 'log', 'py', 'js', 'html', 'css', 'yaml', 'yml'].includes(fileExt)) {
+      // 文本文件
+      const text = await blob.text();
+      
+      // Markdown 文件特殊处理 - 支持代码/渲染视图切换
+      if (fileExt === 'md') {
+        renderMarkdownWithToggle(displayElement, text, fileName, '#chat-file-sidebar');
+      } else {
+        displayElement.innerHTML = `<pre style="background-color: var(--gray-2); padding: var(--spacing-md); border-radius: var(--radius-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>`;
+      }
+    } else {
+      // 未知文件类型
+      displayElement.innerHTML = `
+        <div class="file-type-notice">
+          <div class="icon">📦</div>
+          <h3>未知文件类型</h3>
+          <p>文件类型: ${fileExt.toUpperCase()}</p>
+          <p style="color: var(--gray-6);">无法预览此文件</p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Load file content error:', error);
+    if (loadingElement) loadingElement.style.display = 'none';
+    if (displayElement) {
+      displayElement.style.display = 'block';
+      displayElement.innerHTML = `
+        <div class="file-type-notice">
+          <div class="icon">❌</div>
+          <h3>加载失败</h3>
+          <p style="margin-top: var(--spacing-md); color: var(--error);">${error.message}</p>
+        </div>
+      `;
+    }
   }
 }
 
 /**
- * 显示文件访问对话框
+ * 在侧边栏渲染 PDF
  */
-function showFileAccessDialog(filePath, fileName) {
-  const dialog = document.createElement('div');
-  dialog.className = 'file-access-dialog';
-  dialog.innerHTML = `
-    <div class="file-access-overlay" onclick="this.parentElement.remove()"></div>
-    <div class="file-access-content">
-      <div class="file-access-header">
-        <span class="file-access-icon">📁</span>
-        <h3>文件访问</h3>
+async function renderPdfInSidebar(blob, displayElement) {
+  try {
+    const arrayBuffer = await blob.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const totalPages = pdf.numPages;
+    
+    let pagesHtml = '';
+    for (let pageNum = 1; pageNum <= Math.min(totalPages, 50); pageNum++) {
+      pagesHtml += `<canvas id="chat-pdf-page-${pageNum}" style="display: block; margin: 0 auto var(--spacing-md); border: 1px solid var(--gray-3); border-radius: var(--radius-sm);"></canvas>`;
+    }
+    
+    if (totalPages > 50) {
+      pagesHtml += `<p style="text-align: center; color: var(--gray-6); padding: var(--spacing-md);">只显示前 50 页（共 ${totalPages} 页）</p>`;
+    }
+    
+    displayElement.innerHTML = `<div style="padding: var(--spacing-md);">${pagesHtml}</div>`;
+    
+    // 渲染每一页
+    for (let pageNum = 1; pageNum <= Math.min(totalPages, 50); pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1 });
+      const scale = Math.min(550 / viewport.width, 2.0);
+      const scaledViewport = page.getViewport({ scale: scale });
+      
+      const canvas = document.getElementById(`chat-pdf-page-${pageNum}`);
+      if (canvas) {
+        canvas.width = scaledViewport.width;
+        canvas.height = scaledViewport.height;
+        const context = canvas.getContext('2d');
+        await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
+      }
+    }
+  } catch (error) {
+    console.error('PDF rendering error:', error);
+    displayElement.innerHTML = `
+      <div class="file-type-notice">
+        <div class="icon">❌</div>
+        <h3>PDF 解析失败</h3>
+        <p style="color: var(--error);">${error.message}</p>
       </div>
-      <div class="file-access-body">
-        <p class="file-access-name">📄 ${escapeHtml(fileName)}</p>
-        <p class="file-access-tip">由于浏览器安全限制，无法直接打开本地文件。</p>
-        <p class="file-access-path-label">文件路径：</p>
-        <div class="file-access-path">
-          <code id="file-path-text">${escapeHtml(filePath)}</code>
-          <button class="file-access-copy-btn" onclick="copyFilePath('${filePath.replace(/'/g, "\\'")}')">
-            📋 复制路径
-          </button>
-        </div>
-        <div class="file-access-instructions">
-          <p><strong>打开方式：</strong></p>
-          <ol>
-            <li>点击上方"复制路径"按钮</li>
-            <li>在文件管理器（访达/资源管理器）中粘贴路径并打开</li>
-            <li>或使用命令行：<code>open "${filePath}"</code></li>
-          </ol>
-        </div>
-      </div>
-      <div class="file-access-footer">
-        <button class="btn btn-primary" onclick="this.closest('.file-access-dialog').remove()">
-          知道了
-        </button>
-      </div>
-    </div>
-  `;
-  
-  document.body.appendChild(dialog);
+    `;
+  }
 }
 
 /**
- * 复制文件路径
+ * 在侧边栏渲染 Excel（使用 utils.js 中的通用函数）
  */
-window.copyFilePath = function(filePath) {
-  navigator.clipboard.writeText(filePath).then(() => {
-    showToast('✅ 路径已复制到剪贴板', 'success');
-  }).catch(() => {
-    // 降级方案
-    const textarea = document.createElement('textarea');
-    textarea.value = filePath;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textarea);
-    showToast('✅ 路径已复制到剪贴板', 'success');
+async function renderExcelInSidebar(blob, displayElement) {
+  // 使用通用函数
+  await window.renderExcelInContainer(blob, displayElement, {
+    maxRows: 3000,
+    showSheetSelector: true
   });
-};
+}
 
-/**
- * 预览图片（点击放大）
- */
-window.previewImage = function(src, alt) {
-  const overlay = document.createElement('div');
-  overlay.className = 'image-preview-overlay';
-  overlay.innerHTML = `
-    <div class="image-preview-container" onclick="event.stopPropagation()">
-      <div class="image-preview-header">
-        <span class="image-preview-title">${escapeHtml(alt || '图片预览')}</span>
-        <button class="image-preview-close" onclick="this.closest('.image-preview-overlay').remove()">✕</button>
-      </div>
-      <div class="image-preview-content">
-        <img src="${src}" alt="${escapeHtml(alt || '')}" class="image-preview-img">
-      </div>
-    </div>
-  `;
-  
-  // 点击遮罩关闭
-  overlay.onclick = function() {
-    overlay.remove();
-  };
-  
-  document.body.appendChild(overlay);
-};
 
 // Handle file attachment
 function handleFileAttachment(files) {
@@ -2374,6 +2479,9 @@ async function clearChatHistory() {
     messagesContainer.innerHTML = ''; // Clear all messages
   }
 
+  // Clear localStorage
+  localStorage.removeItem('chat-history');
+
   // Switch back to center mode
   switchToCenterMode();
 
@@ -2381,6 +2489,89 @@ async function clearChatHistory() {
   updateClearButtonState();
 
   showToast(t('toast_chat_cleared'), 'success');
+}
+
+// Save chat history to localStorage
+function saveChatHistory() {
+  try {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer && chatMessages.length > 0) {
+      const historyData = {
+        messages: chatMessages,
+        html: messagesContainer.innerHTML,
+        hasMessages: messagesContainer.classList.contains('has-messages'),
+        timestamp: Date.now()
+      };
+      localStorage.setItem('chat-history', JSON.stringify(historyData));
+    }
+  } catch (error) {
+    console.error('Failed to save chat history:', error);
+  }
+}
+
+// Restore chat history from localStorage
+function restoreChatHistory() {
+  try {
+    const savedHistory = localStorage.getItem('chat-history');
+    if (!savedHistory) {
+      return;
+    }
+
+    const historyData = JSON.parse(savedHistory);
+    if (!historyData || !historyData.messages || historyData.messages.length === 0) {
+      return;
+    }
+
+    // Restore chatMessages array
+    chatMessages = historyData.messages;
+
+    // Restore HTML content
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer && historyData.html) {
+      messagesContainer.innerHTML = historyData.html;
+      
+      // Restore has-messages class
+      if (historyData.hasMessages) {
+        messagesContainer.classList.add('has-messages');
+      }
+
+      // Restore input container to bottom mode if there are messages
+      if (chatMessages.length > 0) {
+        const inputContainer = document.getElementById('chat-input-container');
+        if (inputContainer) {
+          inputContainer.classList.remove('center-mode');
+          inputContainer.classList.add('bottom-mode');
+        }
+      }
+
+      // Reattach event listeners to copy buttons
+      reattachCopyButtonListeners();
+
+      // Update clear button state
+      updateClearButtonState();
+
+      // Scroll to bottom after DOM is fully rendered
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          console.log(`[Chat] Restored ${chatMessages.length} messages and scrolled to bottom`);
+        }, 100);
+      });
+    }
+  } catch (error) {
+    console.error('Failed to restore chat history:', error);
+    // If restore fails, clear the corrupted data
+    localStorage.removeItem('chat-history');
+  }
+}
+
+// Reattach event listeners to copy buttons after restoring HTML
+function reattachCopyButtonListeners() {
+  // Copy buttons use onclick="copyMessageContent(this)" in HTML
+  // So they should work automatically when HTML is restored
+  // We just need to make sure the global function is available
+  // No additional event listener attachment is needed
+  console.log('[Chat] Copy buttons restored with HTML');
 }
 
 // ========== Collapsible Card Component System ==========
@@ -2415,7 +2606,7 @@ function createCollapsibleCard(title, icon, bgColor) {
         <span class="status-icon running">${icon}</span>
         <span>${escapeHtml(title)}</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="card-header-flex">
         <span class="execution-time">0.00s</span>
         <span class="toggle-icon">▼</span>
       </div>
@@ -2483,6 +2674,7 @@ function updateCardContent(card, content, type = 'text') {
       const fieldName = codeFieldMatch ? 'code' : 'sql';
       language = fieldName;
 
+      // Manual parsing for streaming JSON
       const fieldMatch = content.match(new RegExp(`"${fieldName}"\\s*:\\s*"`));
       const codeStartIndex = fieldMatch ? content.indexOf(fieldMatch[0]) + fieldMatch[0].length : -1;
       codeContent = codeStartIndex > -1 ? content.substring(codeStartIndex) : '';
@@ -2490,11 +2682,15 @@ function updateCardContent(card, content, type = 'text') {
       // Remove trailing "} or "
       codeContent = codeContent.replace(/"\}$/g, '').replace(/"$/g, '');
 
-      // Handle JSON escape characters
+      // Handle JSON escape sequences properly
+      // Must process in correct order to avoid double-unescaping
       codeContent = codeContent
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\"/g, '"');
+        .replace(/\\\\/g, '\x00')      // Temporarily replace \\ with placeholder
+        .replace(/\\"/g, '"')           // \" -> "
+        .replace(/\\n/g, '\n')          // \n -> newline
+        .replace(/\\t/g, '\t')          // \t -> tab
+        .replace(/\\r/g, '\r')          // \r -> carriage return
+        .replace(/\x00/g, '\\');        // Restore \\ -> \
     } else {
       // Markdown code block format ```language\n...\n```
       const mdCodeMatch = content.match(/```(\w+)\n([\s\S]*?)(?:```)?$/);
@@ -2660,6 +2856,16 @@ function hideTotalTimeDisplay() {
 }
 
 // ========== Copy Functionality ==========
+
+/**
+ * Update all copy button titles when language changes
+ */
+function updateCopyButtonTitles() {
+  const copyButtons = document.querySelectorAll('.copy-btn');
+  copyButtons.forEach(button => {
+    button.title = t('copy_content');
+  });
+}
 
 /**
  * Copy message content to clipboard
@@ -2949,7 +3155,7 @@ function createUploadProgressCard(filename, taskId) {
         <span class="status-icon running">⏳</span>
         <span>Uploading file: ${filename}</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 12px;">
+      <div class="card-header-flex">
         <span class="execution-time">${new Date().toLocaleTimeString()}</span>
         <span class="toggle-icon">▼</span>
       </div>

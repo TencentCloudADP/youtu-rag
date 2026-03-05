@@ -83,6 +83,10 @@ class ChainPlanner:
 
         match = re.search(r"<plan>\s*\[(.*?)\]\s*</plan>", text, re.DOTALL)
         plan_content = "[" + match.group(1).strip() + "]"
+
+        match = re.search(r"<feedback>(.*?)</feedback>", text, re.DOTALL)
+        feedback = match.group(1).strip() if match else ""
+
         tasks: list[Task] = []
         try:
             # 使用 JSON 解析，更可靠
@@ -91,10 +95,10 @@ class ChainPlanner:
                 tasks.append(Task(agent_name=task_item["name"], task=task_item["task"]))
         except json.JSONDecodeError as e:
             raise ValueError(f"Failed to parse plan JSON: {e}\nContent: {plan_content}")
-        # check validity
-        assert len(tasks) > 0, "No tasks parsed from plan"
-        tasks[-1].is_last_task = True  # FIXME: polish this
-        return Plan(input=recorder.input, analysis=analysis, tasks=tasks)
+        # check validity - allow empty tasks when information is insufficient
+        if len(tasks) > 0:
+            tasks[-1].is_last_task = True  # FIXME: polish this
+        return Plan(input=recorder.input, analysis=analysis, tasks=tasks, feedback=feedback)
 
     async def get_next_task(self, recorder: Recorder) -> Task | None:
         """Get the next task to be executed."""

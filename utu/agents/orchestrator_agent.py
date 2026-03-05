@@ -72,15 +72,18 @@ class OrchestratorAgent:
             try:
                 planner = await self.orchestrator.handle_input(recorder)
                 if planner:  # has a plan
-                    while True:
-                        task = await self.orchestrator.get_next_task(recorder)
-                        if task is None:
-                            logger.error("No task available! This should not happen, please check the planner!")
-                            break
-                        await self._run_task(recorder, task)
-                        if task.is_last_task:
-                            recorder.add_final_output(task.result)
-                            break
+                    if len(recorder.tasks) == 0:
+                        recorder.add_final_output(planner.feedback)
+                    else:
+                        while True:
+                            task = await self.orchestrator.get_next_task(recorder)
+                            if task is None:
+                                logger.error("No task available! This should not happen, please check the planner!")
+                                break
+                            await self._run_task(recorder, task)
+                            if task.is_last_task:
+                                recorder.add_final_output(task.result)
+                                break
                 # log to db
                 DBService.add(TrajectoryModel.from_task_recorder(recorder))
             except Exception as e:

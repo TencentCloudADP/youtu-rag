@@ -2,10 +2,7 @@
   "name": "hello-adp",
   "version": "0.0.0",
   "private": true,
-  "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
-  },
+  "packageManager": "pnpm@10.27.0",
   "scripts": {
     "build": "next build",
     "dev": "next dev",

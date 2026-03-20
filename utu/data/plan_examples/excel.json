@@ -64,6 +64,25 @@
         "plan": [
             {"name": "DashboardAgent", "task": "将历史对话中生成的Markdown销售报告（/output/sales_report.md）转换为交互式HTML网页看板，便于团队演示和查看"}
         ]
+    },
+    {
+        "question": "分析下表格数据，整理关键信息",
+        "available_agents": [
+            {
+                "name": "ExcelAnalysisAgent",
+                "description": "负责Excel表格的深度理解与分析，识别表头、清洗数据、执行多维度统计分析"
+            },
+            {
+                "name": "MarkdownReportAgent",
+                "description": "根据表格分析结果生成图文并茂的Markdown分析报告"
+            },
+            {
+                "name": "DashboardAgent",
+                "description": "将Markdown报告转换为交互式网页数据看板（HTML格式）"
+            }
+        ],
+        "analysis": "用户虽然提出了表格分析任务，但是没有给出具体的表格路径，因此无法执行具体分析。要向用户反馈并要求其提供表格文件",
+        "plan": []
     }
 ]
 

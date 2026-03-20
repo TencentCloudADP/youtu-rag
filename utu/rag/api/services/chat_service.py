@@ -536,14 +536,21 @@ class ChatService:
             return query
 
         # Handle ExcelAnalysisOrchestrator
-        if self.agent.name in ["ExcelAnalysisOrchestrator"]:
-            file_path_str = _download_kb_files(kb_id, file_ids, "ExcelAnalysisOrchestrator")
-            logger.info(f"ExcelAnalysisOrchestrator: Downloaded files to: {file_path_str}")
-            query = f"文件路径: {file_path_str}\n用户问题: {query}"
+        # ExcelAnalysisOrchestrator has direct 'name' attribute, while SimpleAgent uses 'config.agent.name'
+        agent_name = None
+        if hasattr(self.agent, 'name'):
+            agent_name = self.agent.name
+        elif hasattr(self.agent, 'config'):
+            agent_name = self.agent.config.agent.name
+        
+        if agent_name in ["ExcelAnalysisOrchestrator"]:
+            if kb_id is None or file_ids is None:
+                query = f"用户问题: {query}"
+            else:
+                file_path_str = _download_kb_files(kb_id, file_ids, "ExcelAnalysisOrchestrator")
+                logger.info(f"ExcelAnalysisOrchestrator: Downloaded files to: {file_path_str}")
+                query = f"文件路径: {file_path_str}\n用户问题: {query}"
             return query
-
-
-        agent_name = self.agent.config.agent.name
 
         if agent_name in ["kb-search-agent"]:
             # For KB Search Agent, inject kb_id and file_ids

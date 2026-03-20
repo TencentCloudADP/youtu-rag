@@ -270,6 +270,7 @@ def register_basic_routes(app: FastAPI):
             # 安全检查：只允许访问临时目录和项目目录的文件
             allowed_prefixes = [
                 "/tmp/utu",
+                "/tmp/minio",
                 "/private/tmp/utu",
                 str(settings.PROJECT_ROOT),
             ]

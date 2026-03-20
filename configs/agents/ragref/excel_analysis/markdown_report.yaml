@@ -145,60 +145,78 @@ agent:
       - 颜色搭配需遵循专业原则（如使用连续色阶或分类色板），确保信息层次清晰，视觉舒适。
 
     3. **绘图规范（必须遵守）**：
-      - **图表样式与字体设置顺序固定（严禁颠倒）**：
-        - ✅ **正确顺序**：必须先用 `plt.style.use()` 设置全局样式，再配置中文字体
-        - ❌ **错误顺序**：禁止先设置字体再用 `plt.style.use()`，否则字体配置会被覆盖
-      
-      - **中文字体自适应配置**：代码会自动检测系统可用的中文字体，按优先级依次尝试。必须使用以下代码块顺序进行配置：
+   
+    - **代码撰写规范（核心要求）**：
+      - **环境持久化原则**：Python 执行环境是持久化的，绘图包（`matplotlib`、`seaborn` 等）的导入和图表样式设置（`plt.style.use()`、`sns.set_palette()` 等）**只需在首次绘图时执行一次**，后续绘图代码无需重复导入和设置
+      - **单次单图原则**：每次代码执行**仅绘制一幅图表**，严禁在一段代码中连续绘制多图（容易报错）
+      - **正确示例** ✅：
+        ```python
+        # 首次绘图：需导入包和设置样式
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        plt.style.use('seaborn-whitegrid')
+        sns.set_palette("husl")
+        
+        # 设置中文字体...
+        
+        # 绘制第一张图
+        plt.figure(figsize=(10, 6))
+        plt.plot(x, y)
+        plt.savefig('chart1.png')
+        plt.close()
+        ```
+        ```python
+        # 后续绘图：无需重复导入和设置，直接绘图
+        plt.figure(figsize=(10, 6))
+        plt.bar(categories, values)
+        plt.savefig('chart2.png')
+        plt.close()
+        ```
+      - **错误示例** ❌：
+        ```python
+        # 错误：一段代码绘制多图
+        plt.figure(figsize=(10, 6))
+        plt.plot(x1, y1)
+        plt.savefig('chart1.png')
+        
+        plt.figure(figsize=(10, 6))  # 容易报错
+        plt.bar(x2, y2)
+        plt.savefig('chart2.png')
+        ```
+    
+    - **图表样式与字体设置顺序固定（严禁颠倒）**：
+      - ✅ **正确顺序**：必须先用 `plt.style.use()` 设置全局样式，再配置中文字体
+      - ❌ **错误顺序**：禁止先设置字体再用 `plt.style.use()`，否则字体配置会被覆盖
+    
+    - **中文字体库限定**：仅限使用 `Microsoft YaHei`， `Source Han Sans CN`， `STFangsong`， `STHeiti`， `STKaiti`， `STSong` 六款字体。必须使用以下代码块顺序进行配置：
 
-      ```python
-      # 1. 【第一步】先设置图表样式（必须在字体设置之前）
-      plt.style.use('seaborn-v0_8-whitegrid')  # 使用新版样式名称
-      sns.set_palette("husl")  # 或其他合适的调色板
-      
-      # 2. 【第二步】再设置中文字体（必须在样式设置之后，自动检测可用字体）
-      import matplotlib.pyplot as plt
-      import matplotlib.font_manager as fm
-      
-      # 定义字体优先级列表（Windows字体 + macOS字体 + Linux字体）
-      font_candidates = [
-          'Microsoft YaHei',      # Windows
-          'SimHei',               # Windows
-          'PingFang SC',          # macOS
-          'Heiti TC',             # macOS
-          'STHeiti',              # macOS
-          'Arial Unicode MS',     # macOS
-          'Source Han Sans CN',   # 跨平台
-          'Noto Sans CJK SC',     # Linux
-          'WenQuanYi Micro Hei'   # Linux
-      ]
-      
-      # 获取系统所有可用字体
-      available_fonts = set(f.name for f in fm.fontManager.ttflist)
-      
-      # 选择第一个可用的字体
-      font_set = False
-      for font_name in font_candidates:
-          if font_name in available_fonts:
-              plt.rcParams['font.sans-serif'] = [font_name]
-              plt.rcParams['axes.unicode_minus'] = False
-              font_set = True
-              break
-      
-      # 如果没有找到任何中文字体，使用系统默认（可能显示方框，但不会报错）
-      if not font_set:
-          plt.rcParams['axes.unicode_minus'] = False
-      ```
-      
-      - **饼图绘制规范**：
-        - **禁止设置阴影效果**：绘制饼图时，`plt.pie()` 的 `shadow` 参数必须设置为 `False` 或不设置（默认为 False）
-        - **错误示例**：`plt.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=True)`  ❌
-        - **正确示例**：`plt.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=False)` ✅
-      
-      - **画布内容约束（强制）**：
-        - **禁止在画布内部添加文本框**（`plt.text()` / `ax.text()` / `fig.text()`）：文本框容易与图例位置重叠，导致不美观
-        - **禁止在画布内部添加表格**（`plt.table()` / `ax.table()`）：表格内容容易导致布局混乱，不美观
-        - **正确做法**：如需补充说明，应在图表下方用 Markdown 文字描述；如需展示表格数据，应在 Markdown 报告中使用独立的表格区块
+    ```python
+    # 1. 【第一步】先设置图表样式（必须在字体设置之前）
+    plt.style.use('seaborn-whitegrid')
+    sns.set_palette("husl")  # 或其他合适的调色板
+    
+    # 2. 【第二步】再设置中文字体（必须在样式设置之后，从字体列表中选取第一个可用的）
+    import matplotlib
+    font_names = ['Microsoft YaHei', 'Source Han Sans CN', 'STFangsong', 'STHeiti', 'STKaiti', 'STSong']
+    for font_name in font_names:
+        try:
+            matplotlib.rcParams['font.sans-serif'] = [font_name]
+            matplotlib.rcParams['axes.unicode_minus'] = False
+            print(f'成功设置字体: {font_name}')
+            break
+        except:
+            continue
+    ```
+    
+    - **饼图绘制规范**：
+      - **禁止设置阴影效果**：绘制饼图时，`plt.pie()` 的 `shadow` 参数必须设置为 `False` 或不设置（默认为 False）
+      - **错误示例**：`plt.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=True)`  ❌
+      - **正确示例**：`plt.pie(sizes, labels=labels, autopct='%1.1f%%', shadow=False)` ✅
+    
+    - **画布内容约束（强制）**：
+      - **禁止在画布内部添加文本框**（`plt.text()` / `ax.text()` / `fig.text()`）：文本框容易与图例位置重叠，导致不美观
+      - **禁止在画布内部添加表格**（`plt.table()` / `ax.table()`）：表格内容容易导致布局混乱，不美观
+      - **正确做法**：如需补充说明，应在图表下方用 Markdown 文字描述；如需展示表格数据，应在 Markdown 报告中使用独立的表格区块
 
     4. **图文布局优化（核心要求）**：
       - **优先单图单画布**：每个重要的分析点尽量使用独立的图表进行展示，确保图文对应清晰，便于阅读和引用。
@@ -287,16 +305,34 @@ agent:
       - 结构：概述 → 数据说明 → 多维度分析（6个子维度）→ 核心洞察 → 结论与建议
 
     2. **图文嵌入（强制约束）**：
-      - **图片引用格式强制要求**：所有图表**必须以绝对路径的形式**嵌入，格式为 `![描述文本](/path/to/image.png)`
+      - **图片引用格式强制要求**：所有图表**必须以绝对路径的形式**嵌入，格式为 `![描述文本](/absolute/path/to/image.png)`
+      - **⚠️ 禁止使用特殊前缀**：严禁使用 `sandbox:`、`file://`、`data:` 等任何前缀，必须是纯净的本地绝对路径
       - **正确示例** ✅：
         ```markdown
-        ![销售趋势](./charts/sales_trend.png)
-        ![区域分布](/Users/username/report/region.png)
+        ![销售趋势](/Users/username/workspace/charts/sales_trend.png)
+        ![区域分布](/home/user/project/report/region.png)
+        ```
+      - **错误示例** ❌：
+        ```markdown
+        ![销售趋势](sandbox:/charts/sales_trend.png)  # 禁止 sandbox: 前缀
+        ![区域分布](file:///path/to/region.png)  # 禁止 file:// 前缀
+        ![数据图](data:image/png;base64,...)  # 禁止 data: 前缀
         ```
       - **禁止同一张图片重复嵌入**：后续提及该图时，使用文字引用（如"如上图所示"或"参见图1"），不要重复嵌入。
 
     3. **数据表格**：
       - 当用户明确要求生成表格数据时，除在报告中展示关键摘要外，需提供**完整数据文件的绝对路径**（如CSV或Excel格式）。
+      - **⚠️ 禁止使用特殊前缀**：文件链接必须是纯净的本地绝对路径，严禁使用 `sandbox:`、`file://` 等前缀
+      - **正确示例** ✅：
+        ```markdown
+        [筛选后的有效数据.csv](/Users/username/workspace/data/filtered_data.csv)
+        [总销售额低于1000元的商品.xlsx](/home/user/project/data/less_than_1000.xlsx)
+        ```
+      - **错误示例** ❌：
+        ```markdown
+        [数据文件.csv](sandbox:/data/filtered_data.csv)  # 禁止 sandbox: 前缀
+        [数据文件.xlsx](file:///data/output.xlsx)  # 禁止 file:// 前缀
+        ```
 
     ---
 
@@ -304,7 +340,7 @@ agent:
 
     **场景区分**：
     - **直接反馈**：用户仅需查看分析结果 → 直接输出报告内容，无需生成文件
-    - **文件生成**：用户明确要求生成报告文件，或需要后续加工（网页看板、长图等）→ 才需要用 Python 代码生成 `.md` 文件
+    - **文件生成**：用户明确要求生成报告文件，或需要后续加工（网页看板）→ 才需要用 Python 代码生成 `.md` 文件
 
     ### 文件生成规范（仅当需要生成文件时）
 
@@ -417,6 +453,7 @@ agent:
     **关键要求**：
     - **必须先获取工作目录**：`work_dir = os.getcwd()`
     - **图片引用必须使用绝对路径**：在 Markdown 中使用 `![描述]({chart_abs_path})` 格式
+    - **⚠️ 严禁使用特殊前缀**：图片和文件路径必须是纯净的本地绝对路径（如 `/Users/username/file.png`），严禁使用 `sandbox:`、`file://`、`data:` 等任何前缀
     - **注意**：只有图片路径可以使用 f-string 格式化，数据分析的数值结果仍必须直接写入固定字符串
     - `report_markdown` 中涉及到数字、百分比、金额等具体数值的内容，必须**直接写入固定字符串**
     - **严禁对数据结果使用变量进行格式化替换**（如 `f"{value}%"` 或 `"{:.2f}".format(value)`），因为容易出错
@@ -463,7 +500,6 @@ agent:
       - 使用 Markdown 格式组织内容（标题、图片、表格等）
       - 提供清晰的数据分析结论
       - **无需创建 .md 文件，无需调用文件写入代码**
-      - 反馈内容末尾添加"报告加工选项"声明
 
     2. **反馈格式示例**：
       ```markdown
@@ -475,7 +511,7 @@ agent:
       3. Q4 季度呈现明显季节性波动
       
       ### 二、销售趋势分析
-      ![销售趋势图](图片路径或链接)
+      ![销售趋势图](图片路径)
       
       从上图可以看出...
       
@@ -490,33 +526,24 @@ agent:
       4. 加大华东区域投入，保持市场优势
       5. 重点推广新品类，扩大市场份额
       6. 优化 Q4 库存管理，应对季节性波动
-      
-      ---
-      
-      ## 🎨 报告加工选项
-      
-      我可以将以上图文信息整理成一份完整的 **Markdown报告** ，支持下载和分享，请问您需要吗？
       ```
 
-    3. **关键区别**：
+    3. **关键特点**：
       - ✅ 直接展示分析结果（图文并茂）
       - ❌ **不创建 .md 文件**
       - ❌ **无需给出报告文件链接**
 
     ### 5.2 报告文件生成场景（需要生成报告文件）
 
-    **适用情况**：根据用户问题意图判断需要生成报告，或需要后续加工（网页看板、长图等）。
+    **适用情况**：根据用户问题意图判断需要生成报告，或需要后续加工（网页看板）。
 
     **执行要求**：
     1. **必须创建 Markdown 报告文件**：
       - 使用"四、 报告输出"中的方法
-      - **仅在对话中输出报告摘要**，在结尾给出报告文件链接
-      - 反馈内容末尾添加"报告加工选项"声明
+      - 在结尾给出报告文件链接
 
     2. **反馈格式示例**：
       ```markdown
-      <报告摘要>
-
       ✅ 报告已生成完成！
       
       📄 报告下载：[report.md](/path/to/the/report.md)
@@ -530,16 +557,6 @@ agent:
       - Q4季度呈现明显季节性波动。
 
       可视化方面采用了折线图展示趋势、饼图展示构成、柱状图进行区域对比，共生成8张图表。
-      
-      ---
-      
-      ## 🎨 报告加工选项
-      
-      我可以抽取报告关键信息将其整理成：
-      
-      🌐 **交互式网页看板** - 支持动态交互，深度探索数据细节
-      
-      **请问您需要吗？**
       ```
 
     ---
@@ -548,9 +565,9 @@ agent:
 
     | 用户需求判断 | 交付方式 | 是否创建文件 | 图片引用方式 | 反馈内容 |
     |------------|---------|------------|------------|---------|
-    | **具体问题（无报告需求）** | 5.1 直接反馈场景 | ❌ 否 | **本地绝对路径** | 对话中直接展示图文分析结果 + 加工选项A |
-    | **具体问题（要求报告）** | 5.2 报告文件生成场景 | ✅ 是 | **本地绝对路径** | 报告路径 + 撰写思路 + 加工选项B |
-    | **宽泛问题（默认生成报告）** | 5.2 报告文件生成场景 | ✅ 是 | **本地绝对路径** | 报告路径 + 撰写思路 + 加工选项B |
+    | **具体问题（无报告需求）** | 5.1 直接反馈场景 | ❌ 否 | **本地绝对路径（禁止 sandbox:/file:// 等前缀）** | 对话中直接展示图文分析结果 |
+    | **具体问题（要求报告）** | 5.2 报告文件生成场景 | ✅ 是 | **本地绝对路径（禁止 sandbox:/file:// 等前缀）** | 报告路径 + 撰写思路 |
+    | **宽泛问题（默认生成报告）** | 5.2 报告文件生成场景 | ✅ 是 | **本地绝对路径（禁止 sandbox:/file:// 等前缀）** | 报告路径 + 撰写思路 |
 
 
 toolkits:

@@ -2279,7 +2279,9 @@ async function loadChatFileContent(filePath, fileName) {
     }
     
     const blob = await response.blob();
-    const fileExt = fileName.split('.').pop().toLowerCase();
+    
+    // 统一从 filePath 提取扩展名（更可靠）
+    const fileExt = filePath.split('.').pop().toLowerCase();
     
     // 存储当前文件的 blob 和文件名，供下载使用
     window._chatSidebarFileBlob = blob;
@@ -2293,61 +2295,31 @@ async function loadChatFileContent(filePath, fileName) {
     if (loadingElement) loadingElement.style.display = 'none';
     if (displayElement) displayElement.style.display = 'block';
     
-    // 根据文件类型渲染内容
+    // 根据文件扩展名选择渲染器
     if (['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'svg'].includes(fileExt)) {
-      // 图片文件
-      const imageUrl = URL.createObjectURL(blob);
-      displayElement.innerHTML = `
-        <div style="text-align: center; padding: var(--spacing-md);">
-          <img src="${imageUrl}" alt="${escapeHtml(fileName)}" style="max-width: 100%; height: auto; border-radius: var(--radius-md);">
-        </div>
-      `;
+      // 图片渲染器
+      renderImageInSidebar(blob, displayElement, fileName);
     } else if (fileExt === 'pdf') {
-      // PDF 文件（需要 pdf.js 库）
-      if (typeof pdfjsLib !== 'undefined') {
-        await renderPdfInSidebar(blob, displayElement);
-      } else {
-        displayElement.innerHTML = `
-          <div class="file-type-notice">
-            <div class="icon">📄</div>
-            <h3>PDF 文件</h3>
-            <p>PDF.js 库未加载，无法预览</p>
-          </div>
-        `;
-      }
+      // PDF 渲染器
+      await renderPdfInSidebar(blob, displayElement);
     } else if (['xlsx', 'xls'].includes(fileExt)) {
-      // Excel 文件
-      if (typeof XLSX !== 'undefined') {
-        await renderExcelInSidebar(blob, displayElement);
-      } else {
-        displayElement.innerHTML = `
-          <div class="file-type-notice">
-            <div class="icon">📊</div>
-            <h3>Excel 文件</h3>
-            <p>XLSX.js 库未加载，无法预览</p>
-          </div>
-        `;
-      }
-    } else if (['txt', 'md', 'json', 'xml', 'csv', 'log', 'py', 'js', 'html', 'css', 'yaml', 'yml'].includes(fileExt)) {
-      // 文本文件
+      // Excel 渲染器
+      await renderExcelInSidebar(blob, displayElement);
+    } else if (fileExt === 'csv') {
+      // CSV 渲染器
       const text = await blob.text();
-      
-      // Markdown 文件特殊处理 - 支持代码/渲染视图切换
-      if (fileExt === 'md') {
-        renderMarkdownWithToggle(displayElement, text, fileName, '#chat-file-sidebar');
-      } else {
-        displayElement.innerHTML = `<pre style="background-color: var(--gray-2); padding: var(--spacing-md); border-radius: var(--radius-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>`;
-      }
+      renderCSVInSidebar(text, displayElement);
+    } else if (fileExt === 'md') {
+      // Markdown 渲染器
+      const text = await blob.text();
+      renderMarkdownWithToggle(displayElement, text, fileName, '#chat-file-sidebar');
+    } else if (['txt', 'json', 'xml', 'log', 'py', 'js', 'html', 'css', 'yaml', 'yml', 'java', 'cpp', 'c', 'h', 'go', 'rs', 'ts', 'tsx', 'jsx', 'sh', 'bash'].includes(fileExt)) {
+      // 纯文本渲染器
+      const text = await blob.text();
+      renderTextInSidebar(text, displayElement);
     } else {
-      // 未知文件类型
-      displayElement.innerHTML = `
-        <div class="file-type-notice">
-          <div class="icon">📦</div>
-          <h3>未知文件类型</h3>
-          <p>文件类型: ${fileExt.toUpperCase()}</p>
-          <p style="color: var(--gray-6);">无法预览此文件</p>
-        </div>
-      `;
+      // 未知类型，尝试作为文本渲染
+      await renderUnknownFileInSidebar(blob, displayElement, fileExt);
     }
   } catch (error) {
     console.error('Load file content error:', error);
@@ -2366,37 +2338,84 @@ async function loadChatFileContent(filePath, fileName) {
 }
 
 /**
+ * 在侧边栏渲染 Excel（使用 utils.js 中的通用函数）
+ */
+async function renderExcelInSidebar(blob, displayElement) {
+  if (typeof XLSX !== 'undefined') {
+    await window.renderExcelInContainer(blob, displayElement, {
+      maxRows: 3000,
+      showSheetSelector: true
+    });
+  } else {
+    displayElement.innerHTML = `
+      <div class="file-type-notice">
+        <div class="icon">📊</div>
+        <h3>Excel 文件</h3>
+        <p>XLSX.js 库未加载，无法预览</p>
+      </div>
+    `;
+  }
+}
+
+/**
+ * 在侧边栏渲染图片
+ */
+function renderImageInSidebar(blob, displayElement, fileName) {
+  const imageUrl = URL.createObjectURL(blob);
+  displayElement.innerHTML = `
+    <div style="text-align: center; padding: var(--spacing-md);">
+      <img src="${imageUrl}" alt="${escapeHtml(fileName)}" style="max-width: 100%; height: auto; border-radius: var(--radius-md);">
+    </div>
+  `;
+}
+
+/**
+ * 在侧边栏渲染纯文本
+ */
+function renderTextInSidebar(text, displayElement) {
+  displayElement.innerHTML = `<pre style="background-color: var(--gray-2); padding: var(--spacing-md); border-radius: var(--radius-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>`;
+}
+
+/**
  * 在侧边栏渲染 PDF
  */
 async function renderPdfInSidebar(blob, displayElement) {
+  if (typeof pdfjsLib === 'undefined') {
+    displayElement.innerHTML = `
+      <div class="file-type-notice">
+        <div class="icon">📄</div>
+        <h3>PDF 文件</h3>
+        <p>PDF.js 库未加载，无法预览</p>
+      </div>
+    `;
+    return;
+  }
+
   try {
     const arrayBuffer = await blob.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const totalPages = pdf.numPages;
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
     
-    let pagesHtml = '';
-    for (let pageNum = 1; pageNum <= Math.min(totalPages, 50); pageNum++) {
-      pagesHtml += `<canvas id="chat-pdf-page-${pageNum}" style="display: block; margin: 0 auto var(--spacing-md); border: 1px solid var(--gray-3); border-radius: var(--radius-sm);"></canvas>`;
-    }
+    displayElement.innerHTML = '<div id="chat-pdf-container" style="overflow-y: auto; max-height: 600px;"></div>';
+    const container = displayElement.querySelector('#chat-pdf-container');
     
-    if (totalPages > 50) {
-      pagesHtml += `<p style="text-align: center; color: var(--gray-6); padding: var(--spacing-md);">只显示前 50 页（共 ${totalPages} 页）</p>`;
-    }
-    
-    displayElement.innerHTML = `<div style="padding: var(--spacing-md);">${pagesHtml}</div>`;
-    
-    // 渲染每一页
-    for (let pageNum = 1; pageNum <= Math.min(totalPages, 50); pageNum++) {
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
       const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 1 });
-      const scale = Math.min(550 / viewport.width, 2.0);
-      const scaledViewport = page.getViewport({ scale: scale });
+      const scale = 1.5;
+      const viewport = page.getViewport({ scale });
       
-      const canvas = document.getElementById(`chat-pdf-page-${pageNum}`);
-      if (canvas) {
-        canvas.width = scaledViewport.width;
-        canvas.height = scaledViewport.height;
-        const context = canvas.getContext('2d');
+      const canvas = document.createElement('canvas');
+      canvas.style.display = 'block';
+      canvas.style.margin = '0 auto var(--spacing-md)';
+      canvas.style.border = '1px solid var(--gray-4)';
+      container.appendChild(canvas);
+      
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      const scaledViewport = page.getViewport({ scale });
+      if (context) {
         await page.render({ canvasContext: context, viewport: scaledViewport }).promise;
       }
     }
@@ -2413,14 +2432,103 @@ async function renderPdfInSidebar(blob, displayElement) {
 }
 
 /**
- * 在侧边栏渲染 Excel（使用 utils.js 中的通用函数）
+ * 在侧边栏渲染未知类型文件（尝试文本 fallback）
  */
-async function renderExcelInSidebar(blob, displayElement) {
-  // 使用通用函数
-  await window.renderExcelInContainer(blob, displayElement, {
-    maxRows: 3000,
-    showSheetSelector: true
-  });
+async function renderUnknownFileInSidebar(blob, displayElement, fileExt) {
+  try {
+    const text = await blob.text();
+    // 尝试作为文本显示
+    renderTextInSidebar(text, displayElement);
+  } catch (error) {
+    // 无法作为文本读取
+    displayElement.innerHTML = `
+      <div class="file-type-notice">
+        <div class="icon">📦</div>
+        <h3>未知文件类型</h3>
+        <p>文件类型: ${fileExt ? fileExt.toUpperCase() : '无扩展名'}</p>
+        <p style="color: var(--gray-6);">无法预览此文件</p>
+      </div>
+    `;
+  }
+}
+
+/**
+ * 在侧边栏渲染 CSV 文件
+ */
+function renderCSVInSidebar(text, displayElement) {
+  try {
+    // 简单的 CSV 解析（支持引号和逗号）
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length === 0) {
+      displayElement.innerHTML = '<div class="file-type-notice"><div class="icon">📄</div><h3>空文件</h3></div>';
+      return;
+    }
+
+    // 解析 CSV 行（处理引号内的逗号）
+    function parseCSVLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    const rows = lines.map(line => parseCSVLine(line));
+    const maxCols = Math.max(...rows.map(row => row.length));
+    
+    // 生成表格 HTML
+    let tableHTML = `
+      <div style="overflow-x: auto; max-height: 600px; background-color: var(--gray-1);">
+        <table style="width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);">
+          <thead style="position: sticky; top: 0; background-color: var(--gray-3); z-index: 1;">
+            <tr>`;
+    
+    // 表头
+    const headers = rows[0];
+    headers.forEach((header, index) => {
+      tableHTML += `<th style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--gray-4); text-align: left; font-weight: 600; white-space: nowrap;">${escapeHtml(header)}</th>`;
+    });
+    
+    tableHTML += `</tr></thead><tbody>`;
+    
+    // 数据行（最多显示 1000 行）
+    const maxRows = Math.min(rows.length, 1000);
+    for (let i = 1; i < maxRows; i++) {
+      tableHTML += '<tr>';
+      for (let j = 0; j < maxCols; j++) {
+        const cell = rows[i][j] || '';
+        tableHTML += `<td style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--gray-4); white-space: nowrap;">${escapeHtml(cell)}</td>`;
+      }
+      tableHTML += '</tr>';
+    }
+    
+    tableHTML += '</tbody></table>';
+    
+    // 如果行数过多，显示提示
+    if (rows.length > 1000) {
+      tableHTML += `<div style="padding: var(--spacing-md); text-align: center; color: var(--gray-6); background-color: var(--gray-2);">仅显示前 1000 行，共 ${rows.length} 行</div>`;
+    }
+    
+    tableHTML += '</div>';
+    
+    displayElement.innerHTML = tableHTML;
+  } catch (error) {
+    console.error('CSV rendering error:', error);
+    displayElement.innerHTML = `<pre style="background-color: var(--gray-2); padding: var(--spacing-md); border-radius: var(--radius-md); overflow-x: auto; font-size: var(--font-size-sm); line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${escapeHtml(text)}</pre>`;
+  }
 }
 
 

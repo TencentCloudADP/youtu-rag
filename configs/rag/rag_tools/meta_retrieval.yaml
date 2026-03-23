@@ -17,7 +17,7 @@ config:
   # embedding:
   #   backend: openai
   #   model: ${oc.env:UTU_EMBEDDING_MODEL}  # e.g., text-embedding-3-small
-  #   api_key: ${oc.env:UTU_API_KEY}
+  #   api_key: ${oc.env:UTU_EMBEDDING_API_KEY}
   #   base_url: ${oc.env:UTU_EMBEDDING_URL}  # e.g., https://api.openai.com/v1
 
   # Reranker configuration

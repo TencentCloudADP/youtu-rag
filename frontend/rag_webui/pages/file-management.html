@@ -214,7 +214,10 @@
 <div id="file-content-sidebar" class="file-content-sidebar" style="display: none;">
   <div class="sidebar-header">
     <h3 class="sidebar-title" id="sidebar-filename" data-i18n="file_content">文件内容</h3>
-    <button class="sidebar-close" onclick="closeFileContentSidebar()">&times;</button>
+    <div class="sidebar-header-actions">
+      <!-- Markdown toggle button will be inserted here if needed -->
+      <button class="sidebar-close" onclick="closeFileContentSidebar()">&times;</button>
+    </div>
   </div>
   <div class="sidebar-body">
     <div id="sidebar-content-loading" style="text-align: center; padding: 48px;">

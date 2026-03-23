@@ -1,0 +1,1660 @@
+default: |
+  <!DOCTYPE html>
+  <html lang="zh-CN">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{{ config.title }}</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      
+      <style>
+          :root {
+              --primary-blue: #3b82f6;
+              --bg-page: #f0f2f5;
+              --text-main: #1f2937;
+              --text-sub: #6b7280;
+          }
+
+          body { 
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+              background-color: var(--bg-page);
+              color: var(--text-main);
+          }
+
+          .top-nav {
+              background: white;
+              box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+              padding: 16px 32px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 24px;
+          }
+
+          .dashboard-row {
+              display: grid;
+              gap: 24px;
+              margin-bottom: 24px;
+          }
+
+          .clean-card {
+              background: white;
+              border-radius: 12px;
+              padding: 24px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
+              transition: box-shadow 0.3s ease;
+              height: 100%;
+          }
+          .clean-card:hover {
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+          }
+
+          .module-title {
+              font-size: 16px;
+              font-weight: 600;
+              color: #111827;
+              display: flex;
+              align-items: center;
+              margin-bottom: 20px;
+          }
+          .module-title::before {
+              content: '';
+              display: block;
+              width: 4px;
+              height: 16px;
+              background-color: var(--primary-blue);
+              border-radius: 2px;
+              margin-right: 10px;
+          }
+
+          .color-card {
+              border-radius: 12px;
+              padding: 24px;
+              color: white;
+              position: relative;
+              overflow: hidden;
+              display: flex;
+              flex-direction: column;
+              justify-content: space-between;
+              height: 140px;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          }
+          .bg-blue-card { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+          .bg-orange-card { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
+          .bg-purple-card { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+          .bg-red-card { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+
+          .card-icon-bg {
+              position: absolute;
+              right: -10px;
+              bottom: -10px;
+              font-size: 80px;
+              opacity: 0.15;
+              transform: rotate(-15deg);
+          }
+
+          .kpi-num { font-size: 32px; font-weight: 700; margin-top: 4px; font-family: 'Inter', sans-serif; }
+          .kpi-label-sm { font-size: 13px; opacity: 0.9; font-weight: 500; }
+          .kpi-sub { font-size: 12px; margin-top: auto; opacity: 0.8; display: flex; align-items: center; }
+
+          .chart-box { height: 320px; width: 100%; }
+
+          .insight-item {
+              display: flex;
+              align-items: flex-start;
+              padding: 12px 0;
+              border-bottom: 1px solid #f3f4f6;
+          }
+          .insight-item:last-child { border-bottom: none; }
+          .insight-dot {
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              margin-top: 6px;
+              margin-right: 12px;
+              flex-shrink: 0;
+          }
+
+          .metric-item {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 16px 20px;
+              background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+              border-radius: 8px;
+              border-left: 4px solid;
+              transition: all 0.3s ease;
+          }
+          .metric-item:hover {
+              transform: translateX(4px);
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          }
+          .metric-label {
+              font-size: 14px;
+              font-weight: 500;
+              color: #4b5563;
+              display: flex;
+              align-items: center;
+          }
+          .metric-label i {
+              margin-right: 8px;
+              width: 20px;
+              text-align: center;
+          }
+          .metric-value {
+              font-size: 20px;
+              font-weight: 700;
+              color: #111827;
+              font-family: 'Inter', sans-serif;
+          }
+          .metric-unit {
+              font-size: 13px;
+              font-weight: 500;
+              color: #6b7280;
+              margin-left: 4px;
+          }
+
+          /* ========== 新增样式：更丰富的卡片样式 ========== */
+          
+          /* 1. 渐变文本卡片 */
+          .gradient-text-card {
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              border-radius: 16px;
+              padding: 28px;
+              position: relative;
+              overflow: hidden;
+              box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
+          }
+          .gradient-text-card::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+              pointer-events: none;
+          }
+          .gradient-text-card .title {
+              font-size: 18px;
+              font-weight: 700;
+              margin-bottom: 16px;
+              display: flex;
+              align-items: center;
+          }
+          .gradient-text-card .content {
+              font-size: 14px;
+              line-height: 1.6;
+              opacity: 0.95;
+          }
+
+          /* 2. 统计数字卡片 */
+          .stats-card {
+              background: white;
+              border-radius: 16px;
+              padding: 24px;
+              text-align: center;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+              border: 1px solid #f1f5f9;
+              transition: all 0.3s ease;
+              position: relative;
+          }
+          .stats-card:hover {
+              transform: translateY(-4px);
+              box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+          }
+          .stats-card .stats-icon {
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 0 auto 16px;
+              font-size: 24px;
+              color: white;
+          }
+          .stats-card .stats-number {
+              font-size: 36px;
+              font-weight: 800;
+              color: #1e293b;
+              margin-bottom: 8px;
+              font-family: 'Inter', sans-serif;
+          }
+          .stats-card .stats-label {
+              font-size: 14px;
+              color: #64748b;
+              font-weight: 500;
+          }
+          .stats-card .stats-change {
+              position: absolute;
+              top: 16px;
+              right: 16px;
+              font-size: 12px;
+              padding: 4px 8px;
+              border-radius: 12px;
+              font-weight: 600;
+          }
+          .stats-change.positive {
+              background: #dcfce7;
+              color: #166534;
+          }
+          .stats-change.negative {
+              background: #fef2f2;
+              color: #dc2626;
+          }
+
+          /* 3. 引用卡片 */
+          .quote-card {
+              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+              border-left: 6px solid #3b82f6;
+              border-radius: 0 12px 12px 0;
+              padding: 24px 28px;
+              position: relative;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+          }
+          .quote-card::before {
+              content: '"';
+              position: absolute;
+              top: -10px;
+              left: 20px;
+              font-size: 80px;
+              color: #3b82f6;
+              opacity: 0.1;
+              font-family: Georgia, serif;
+          }
+          .quote-card .quote-text {
+              font-size: 16px;
+              font-style: italic;
+              color: #374151;
+              line-height: 1.7;
+              margin-bottom: 16px;
+          }
+          .quote-card .quote-author {
+              font-size: 14px;
+              color: #6b7280;
+              font-weight: 600;
+              text-align: right;
+          }
+
+          /* 4. 进度卡片 */
+          .progress-card {
+              background: white;
+              border-radius: 12px;
+              padding: 24px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+              border: 1px solid #f1f5f9;
+          }
+          .progress-item {
+              margin-bottom: 20px;
+          }
+          .progress-item:last-child {
+              margin-bottom: 0;
+          }
+          .progress-bar {
+              position: relative;
+              width: 100%;
+              height: 36px;
+              background: #f1f5f9;
+              border-radius: 8px;
+              overflow: hidden;
+              cursor: pointer;
+              transition: transform 0.2s ease, box-shadow 0.2s ease;
+          }
+          .progress-bar:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          }
+          .progress-fill {
+              height: 100%;
+              border-radius: 8px;
+              transition: width 0.8s ease, filter 0.2s ease;
+          }
+          .progress-bar:hover .progress-fill {
+              filter: brightness(1.1);
+          }
+          .progress-label {
+              position: absolute;
+              left: 16px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 14px;
+              font-weight: 600;
+              color: white;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+              z-index: 2;
+              transition: transform 0.2s ease;
+          }
+          .progress-bar:hover .progress-label {
+              transform: translateY(-50%) scale(1.05);
+          }
+          .progress-value {
+              position: absolute;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 14px;
+              font-weight: 700;
+              color: white;
+              text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+              z-index: 2;
+              transition: transform 0.2s ease;
+          }
+          .progress-bar:hover .progress-value {
+              transform: translateY(-50%) scale(1.05);
+          }
+
+          /* 5. 通知卡片 */
+          .notification-card {
+              border-radius: 12px;
+              padding: 20px;
+              border-left: 4px solid;
+              position: relative;
+              margin-bottom: 16px;
+          }
+          .notification-card:last-child {
+              margin-bottom: 0;
+          }
+          .notification-card.info {
+              background: #eff6ff;
+              border-color: #3b82f6;
+          }
+          .notification-card.success {
+              background: #f0fdf4;
+              border-color: #22c55e;
+          }
+          .notification-card.warning {
+              background: #fffbeb;
+              border-color: #f59e0b;
+          }
+          .notification-card.error {
+              background: #fef2f2;
+              border-color: #ef4444;
+          }
+          .notification-header {
+              display: flex;
+              align-items: center;
+              margin-bottom: 8px;
+          }
+          .notification-icon {
+              margin-right: 8px;
+              font-size: 16px;
+          }
+          .notification-title {
+              font-size: 14px;
+              font-weight: 600;
+          }
+          .notification-content {
+              font-size: 13px;
+              line-height: 1.5;
+          }
+          .notification-card.info .notification-icon,
+          .notification-card.info .notification-title { color: #1d4ed8; }
+          .notification-card.info .notification-content { color: #1e40af; }
+          .notification-card.success .notification-icon,
+          .notification-card.success .notification-title { color: #15803d; }
+          .notification-card.success .notification-content { color: #166534; }
+          .notification-card.warning .notification-icon,
+          .notification-card.warning .notification-title { color: #d97706; }
+          .notification-card.warning .notification-content { color: #92400e; }
+          .notification-card.error .notification-icon,
+          .notification-card.error .notification-title { color: #dc2626; }
+          .notification-card.error .notification-content { color: #b91c1c; }
+
+          /* 6. 时间轴卡片 */
+          .timeline-card {
+              background: white;
+              border-radius: 12px;
+              padding: 24px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+          }
+          .timeline-item {
+              position: relative;
+              padding-left: 32px;
+              padding-bottom: 24px;
+          }
+          .timeline-item:last-child {
+              padding-bottom: 0;
+          }
+          .timeline-item::before {
+              content: '';
+              position: absolute;
+              left: 8px;
+              top: 8px;
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              background: #3b82f6;
+          }
+          .timeline-item::after {
+              content: '';
+              position: absolute;
+              left: 11px;
+              top: 16px;
+              width: 2px;
+              height: calc(100% - 8px);
+              background: #e5e7eb;
+          }
+          .timeline-item:last-child::after {
+              display: none;
+          }
+          .timeline-time {
+              font-size: 12px;
+              color: #6b7280;
+              font-weight: 500;
+          }
+          .timeline-title {
+              font-size: 14px;
+              font-weight: 600;
+              color: #374151;
+              margin: 4px 0;
+          }
+          .timeline-desc {
+              font-size: 13px;
+              color: #6b7280;
+              line-height: 1.5;
+          }
+
+          /* 7. 特色数据卡片 */
+          .feature-card {
+              background: white;
+              border-radius: 16px;
+              padding: 28px;
+              text-align: center;
+              position: relative;
+              overflow: hidden;
+              box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+              border: 1px solid #f1f5f9;
+          }
+          .feature-card::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 4px;
+              background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4);
+          }
+          .feature-icon {
+              width: 80px;
+              height: 80px;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              margin: 0 auto 20px;
+              font-size: 32px;
+              color: white;
+              background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+              box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+          }
+          .feature-title {
+              font-size: 18px;
+              font-weight: 700;
+              color: #1e293b;
+              margin-bottom: 12px;
+          }
+          .feature-desc {
+              font-size: 14px;
+              color: #64748b;
+              line-height: 1.6;
+          }
+
+          /* 8. 仪表盘样式图表容器 */
+          .dashboard-chart {
+              background: white;
+              border-radius: 16px;
+              padding: 24px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+              border: 1px solid #f8fafc;
+              position: relative;
+          }
+          .dashboard-chart::before {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: 24px;
+              right: 24px;
+              height: 1px;
+              background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+          }
+          .chart-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 24px;
+              padding-bottom: 16px;
+              border-bottom: 1px solid #f1f5f9;
+          }
+          .chart-title {
+              font-size: 18px;
+              font-weight: 700;
+              color: #1e293b;
+          }
+          .chart-subtitle {
+              font-size: 13px;
+              color: #64748b;
+              margin-top: 2px;
+          }
+          .chart-actions {
+              display: flex;
+              gap: 8px;
+          }
+          .chart-btn {
+              padding: 6px 12px;
+              border-radius: 6px;
+              font-size: 12px;
+              font-weight: 500;
+              border: 1px solid #e2e8f0;
+              background: white;
+              color: #64748b;
+              cursor: pointer;
+              transition: all 0.2s ease;
+          }
+          .chart-btn:hover {
+              background: #f8fafc;
+              border-color: #cbd5e1;
+          }
+          .chart-btn.active {
+              background: #3b82f6;
+              border-color: #3b82f6;
+              color: white;
+          }
+          
+          /* 表格排序样式 */
+          .sortable-header {
+              cursor: pointer;
+              user-select: none;
+              position: relative;
+              padding-right: 24px !important;
+              transition: background-color 0.2s ease;
+          }
+          .sortable-header:hover {
+              background-color: #e5e7eb;
+          }
+          .sort-icon {
+              position: absolute;
+              right: 8px;
+              top: 50%;
+              transform: translateY(-50%);
+              font-size: 10px;
+              color: #9ca3af;
+              display: flex;
+              flex-direction: column;
+              gap: 1px;
+          }
+          .sort-icon i {
+              line-height: 1;
+              transition: color 0.2s ease;
+          }
+          .sortable-header.asc .sort-icon .fa-caret-up {
+              color: #3b82f6;
+          }
+          .sortable-header.desc .sort-icon .fa-caret-down {
+              color: #3b82f6;
+          }
+          
+          /* Markdown样式 */
+          .markdown-content {
+              line-height: 1.7;
+              color: #374151;
+          }
+          .markdown-content h1 {
+              font-size: 24px;
+              font-weight: 700;
+              color: #111827;
+              margin-top: 24px;
+              margin-bottom: 16px;
+              padding-bottom: 8px;
+              border-bottom: 2px solid #e5e7eb;
+          }
+          .markdown-content h2 {
+              font-size: 20px;
+              font-weight: 600;
+              color: #1f2937;
+              margin-top: 20px;
+              margin-bottom: 12px;
+          }
+          .markdown-content h3 {
+              font-size: 17px;
+              font-weight: 600;
+              color: #374151;
+              margin-top: 16px;
+              margin-bottom: 10px;
+          }
+          .markdown-content h4 {
+              font-size: 15px;
+              font-weight: 600;
+              color: #4b5563;
+              margin-top: 14px;
+              margin-bottom: 8px;
+          }
+          .markdown-content p {
+              margin-bottom: 12px;
+          }
+          .markdown-content ul,
+          .markdown-content ol {
+              margin-left: 24px;
+              margin-bottom: 12px;
+          }
+          .markdown-content li {
+              margin-bottom: 6px;
+          }
+          .markdown-content strong {
+              font-weight: 600;
+              color: #111827;
+          }
+          .markdown-content em {
+              font-style: italic;
+              color: #6b7280;
+          }
+          .markdown-content code {
+              background: #f3f4f6;
+              padding: 2px 6px;
+              border-radius: 4px;
+              font-family: 'Monaco', 'Courier New', monospace;
+              font-size: 0.9em;
+              color: #dc2626;
+          }
+          .markdown-content pre {
+              background: #1f2937;
+              color: #f3f4f6;
+              padding: 16px;
+              border-radius: 8px;
+              overflow-x: auto;
+              margin-bottom: 16px;
+          }
+          .markdown-content pre code {
+              background: transparent;
+              padding: 0;
+              color: #f3f4f6;
+          }
+          .markdown-content blockquote {
+              border-left: 4px solid #3b82f6;
+              padding-left: 16px;
+              margin-left: 0;
+              margin-bottom: 16px;
+              color: #6b7280;
+              font-style: italic;
+          }
+          .markdown-content a {
+              color: #3b82f6;
+              text-decoration: underline;
+              transition: color 0.2s;
+          }
+          .markdown-content a:hover {
+              color: #2563eb;
+          }
+          .markdown-content hr {
+              border: none;
+              border-top: 1px solid #e5e7eb;
+              margin: 20px 0;
+          }
+          .markdown-content table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 16px;
+          }
+          .markdown-content table th,
+          .markdown-content table td {
+              border: 1px solid #e5e7eb;
+              padding: 8px 12px;
+              text-align: left;
+          }
+          .markdown-content table th {
+              background: #f9fafb;
+              font-weight: 600;
+              color: #374151;
+          }
+      </style>
+  </head>
+  <body class="bg-gray-50/50">
+
+      <!-- 顶部导航 -->
+      <div class="top-nav">
+          <div class="flex items-center space-x-4">
+              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                  {{ config.logo_text or 'B' }}
+              </div>
+              <div>
+                  <h1 class="text-xl font-bold text-gray-800">{{ config.title }}</h1>
+                  <p class="text-xs text-gray-500">{{ config.subtitle or '' }}</p>
+              </div>
+          </div>
+          <div class="flex items-center space-x-4">
+              <span class="text-sm text-gray-500">更新时间: {{ config.update_time }}</span>
+              <button class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                  <i class="fas fa-download mr-2"></i>导出报表
+              </button>
+          </div>
+      </div>
+
+      <div class="px-8 pb-8">
+          <!-- 动态渲染rows -->
+          {% for row in config.rows %}
+          {% set row_index = loop.index0 %}
+          <div class="dashboard-row" style="grid-template-columns: {{ row.grid_columns }};">
+              {% for module in row.modules %}
+                  {% set module_id = row_index ~ '_' ~ loop.index0 %}
+                  
+                  <!-- KPI卡片模块 -->
+                  {% if module.type == 'kpi' %}
+                  <div class="color-card {{ module.data.color_class }}">
+                      <i class="fas fa-{{ module.data.icon }} card-icon-bg"></i>
+                      <div>
+                          <div class="kpi-label-sm">{{ module.data.label }}</div>
+                          <div class="kpi-num">{{ module.data.value }}<span class="text-lg ml-1 font-normal">{{ module.data.unit }}</span></div>
+                      </div>
+                      <div class="kpi-sub">
+                          <span>{{ module.data.sub_label }}</span>
+                          {% if module.data.badge %}
+                          <span class="ml-2 bg-white/20 px-1.5 py-0.5 rounded text-xs font-bold">{{ module.data.badge }}</span>
+                          {% endif %}
+                      </div>
+                  </div>
+                  
+                  <!-- 环形图模块 -->
+                  {% elif module.type == 'pie' %}
+                  <div class="clean-card">
+                      <div class="module-title">{{ module.data.title }}</div>
+                      <div id="pieChart{{ module_id }}" class="chart-box"></div>
+                  </div>
+                  
+                  <!-- 折线图模块 -->
+                  {% elif module.type == 'line' %}
+                  <div class="clean-card">
+                      <div class="module-title">{{ module.data.title }}</div>
+                      <div id="lineChart{{ module_id }}" class="chart-box"></div>
+                  </div>
+                  
+                  <!-- 条形图模块 -->
+                  {% elif module.type == 'bar' %}
+                  <div class="clean-card">
+                      <div class="module-title">{{ module.data.title }}</div>
+                      <div id="barChart{{ module_id }}" class="chart-box" style="height: 250px;"></div>
+                  </div>
+                  
+                  <!-- 描述性指标卡片模块 -->
+                  {% elif module.type == 'metric_cards' %}
+                  <div class="clean-card">
+                      <div class="module-title">{{ module.data.title }}</div>
+                      <div class="space-y-3">
+                          {% for metric in module.data.metrics %}
+                          <div class="metric-item" style="border-left-color: {{ metric.color }};">
+                              <div class="metric-label">
+                                  {% if metric.icon %}
+                                  <i class="fas fa-{{ metric.icon }}" style="color: {{ metric.color }};"></i>
+                                  {% endif %}
+                                  <span>{{ metric.label }}</span>
+                              </div>
+                              <div>
+                                  <span class="metric-value">{{ metric.value }}</span>
+                                  <span class="metric-unit">{{ metric.unit }}</span>
+                              </div>
+                          </div>
+                          {% endfor %}
+                      </div>
+                  </div>
+                  
+                  <!-- 柱状图模块 -->
+                  {% elif module.type == 'column' %}
+                  <div class="clean-card">
+                      <div class="module-title">{{ module.data.title }}</div>
+                      <div id="columnChart{{ module_id }}" class="chart-box" style="height: 300px;"></div>
+                  </div>
+                  
+                  <!-- 洞察列表模块 -->
+                  {% elif module.type == 'insights' %}
+                  <div class="clean-card">
+                      <div class="module-title">{{ module.data.title or '核心洞察' }}</div>
+                      <div class="space-y-2">
+                          {% for insight in module.data.insights %}
+                          <div class="insight-item">
+                              <div class="insight-dot" style="background-color: {{ insight.color }};"></div>
+                              <div>
+                                  <h4 class="text-sm font-bold text-gray-800">{{ insight.title }}</h4>
+                                  <p class="text-xs text-gray-500 mt-1 leading-relaxed">{{ insight.description }}</p>
+                              </div>
+                          </div>
+                          {% endfor %}
+                      </div>
+                  </div>
+                  
+                  <!-- 文本模块 -->
+                  {% elif module.type == 'text' %}
+                  <div class="clean-card">
+                      {% if module.data.title %}
+                      <div class="module-title">{{ module.data.title }}</div>
+                      {% endif %}
+                      <div id="textContent{{ module_id }}" class="markdown-content text-sm text-gray-700 leading-relaxed"></div>
+                  </div>
+                  <script>
+                  (function() {
+                      const content = {{ module.data.content | tojson }};
+                      const container = document.getElementById('textContent{{ module_id }}');
+                      if (container && content) {
+                          // 使用marked渲染Markdown
+                          container.innerHTML = marked.parse(content);
+                      }
+                  })();
+                  </script>
+                  
+                  <!-- 表格模块 -->
+                  {% elif module.type == 'table' %}
+                  <div class="clean-card">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                          {% if module.data.title %}
+                          <div class="module-title" style="margin-bottom: 0;">{{ module.data.title }}</div>
+                          {% else %}
+                          <div></div>
+                          {% endif %}
+                          <button id="reset_btn_{{ module_id }}" class="text-sm text-gray-600 hover:text-blue-600 transition px-3 py-1 rounded border border-gray-300 hover:border-blue-600" style="display: none;">
+                              <i class="fas fa-undo-alt mr-1"></i>恢复排序
+                          </button>
+                      </div>
+                      <div class="overflow-x-auto">
+                          <table class="min-w-full text-sm" id="table_{{ module_id }}">
+                              {% if module.data.headers %}
+                              <thead class="bg-gray-50">
+                                  <tr>
+                                      {% for header in module.data.headers %}
+                                      <th class="px-4 py-2 text-left font-semibold text-gray-700 sortable-header" data-column="{{ loop.index0 }}">
+                                          {{ header }}
+                                          <span class="sort-icon">
+                                              <i class="fas fa-caret-up"></i>
+                                              <i class="fas fa-caret-down"></i>
+                                          </span>
+                                      </th>
+                                      {% endfor %}
+                                  </tr>
+                              </thead>
+                              {% endif %}
+                              <tbody>
+                                  {% for row in module.data.rows %}
+                                  <tr class="border-t border-gray-100 hover:bg-gray-50 transition" data-original-index="{{ loop.index0 }}">
+                                      {% for cell in row %}
+                                      <td class="px-4 py-2 text-gray-600">{{ cell }}</td>
+                                      {% endfor %}
+                                  </tr>
+                                  {% endfor %}
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+                  <script>
+                  (function() {
+                      const table = document.getElementById('table_{{ module_id }}');
+                      const resetBtn = document.getElementById('reset_btn_{{ module_id }}');
+                      if (!table || !resetBtn) return;
+                      
+                      const headers = table.querySelectorAll('.sortable-header');
+                      const tbody = table.querySelector('tbody');
+                      
+                      // 保存初始行顺序
+                      const originalRows = Array.from(tbody.querySelectorAll('tr'));
+                      
+                      // 恢复初始排序
+                      resetBtn.addEventListener('click', function() {
+                          // 移除所有排序状态
+                          headers.forEach(h => h.classList.remove('asc', 'desc'));
+                          
+                          // 按原始索引排序
+                          const rows = Array.from(tbody.querySelectorAll('tr'));
+                          rows.sort((a, b) => {
+                              return parseInt(a.dataset.originalIndex) - parseInt(b.dataset.originalIndex);
+                          });
+                          
+                          // 重新插入
+                          rows.forEach(row => tbody.appendChild(row));
+                          
+                          // 隐藏恢复按钮
+                          resetBtn.style.display = 'none';
+                      });
+                      
+                      headers.forEach(header => {
+                          header.addEventListener('click', function() {
+                              const column = parseInt(this.dataset.column);
+                              const currentSort = this.classList.contains('asc') ? 'asc' : 
+                                                this.classList.contains('desc') ? 'desc' : 'none';
+                              
+                              // 移除所有排序状态
+                              headers.forEach(h => h.classList.remove('asc', 'desc'));
+                              
+                              // 设置新的排序状态
+                              let newSort = 'asc';
+                              if (currentSort === 'asc') {
+                                  newSort = 'desc';
+                              } else if (currentSort === 'desc') {
+                                  newSort = 'asc';
+                              }
+                              this.classList.add(newSort);
+                              
+                              // 显示恢复按钮
+                              resetBtn.style.display = 'block';
+                              
+                              // 获取所有行
+                              const rows = Array.from(tbody.querySelectorAll('tr'));
+                              
+                              // 排序
+                              rows.sort((a, b) => {
+                                  const aVal = a.cells[column].textContent.trim();
+                                  const bVal = b.cells[column].textContent.trim();
+                                  
+                                  // 尝试数字比较
+                                  const aNum = parseFloat(aVal.replace(/[,%¥$]/g, ''));
+                                  const bNum = parseFloat(bVal.replace(/[,%¥$]/g, ''));
+                                  
+                                  if (!isNaN(aNum) && !isNaN(bNum)) {
+                                      return newSort === 'asc' ? aNum - bNum : bNum - aNum;
+                                  }
+                                  
+                                  // 字符串比较
+                                  return newSort === 'asc' ? 
+                                      aVal.localeCompare(bVal, 'zh-CN') : 
+                                      bVal.localeCompare(aVal, 'zh-CN');
+                              });
+                              
+                              // 重新插入排序后的行
+                              rows.forEach(row => tbody.appendChild(row));
+                          });
+                      });
+                  })();
+                  </script>
+                  
+                  <!-- 渐变文本卡片模块 -->
+                  {% elif module.type == 'gradient_text' %}
+                  <div class="gradient-text-card">
+                      {% if module.data.icon %}
+                      <div class="title">
+                          <i class="fas fa-{{ module.data.icon }} mr-3"></i>
+                          {{ module.data.title }}
+                      </div>
+                      {% else %}
+                      <div class="title">{{ module.data.title }}</div>
+                      {% endif %}
+                      <div class="content">{{ module.data.content }}</div>
+                  </div>
+                  
+                  <!-- 统计数字卡片模块 -->
+                  {% elif module.type == 'stats_card' %}
+                  <div class="stats-card">
+                      {% if module.data.change %}
+                      <div class="stats-change {{ 'positive' if module.data.change > 0 else 'negative' }}">
+                          {{ '+' if module.data.change > 0 else '' }}{{ module.data.change }}%
+                      </div>
+                      {% endif %}
+                      <div class="stats-icon" style="background: {{ module.data.icon_color or '#3b82f6' }};">
+                          <i class="fas fa-{{ module.data.icon }}"></i>
+                      </div>
+                      <div class="stats-number">{{ module.data.number }}</div>
+                      <div class="stats-label">{{ module.data.label }}</div>
+                  </div>
+                  
+                  <!-- 引用卡片模块 -->
+                  {% elif module.type == 'quote' %}
+                  <div class="quote-card">
+                      <div class="quote-text">{{ module.data.text }}</div>
+                      <div class="quote-author">— {{ module.data.author }}</div>
+                  </div>
+                  
+                  <!-- 进度卡片模块 -->
+                  {% elif module.type == 'progress' %}
+                  <div class="progress-card">
+                      {% if module.data.title %}
+                      <div class="module-title">{{ module.data.title }}</div>
+                      {% endif %}
+                      {% for item in module.data.progress_items %}
+                      <div class="progress-item">
+                          <div class="progress-bar">
+                              <div class="progress-fill" style="width: {{ item.value }}%; background: {{ item.color or '#3b82f6' }};"></div>
+                              <span class="progress-label">{{ item.label }}</span>
+                              <span class="progress-value" style="left: calc({{ item.value }}% - 50px);">{{ item.value }}%</span>
+                          </div>
+                      </div>
+                      {% endfor %}
+                  </div>
+                  
+                  <!-- 通知卡片模块 -->
+                  {% elif module.type == 'notification' %}
+                  <div class="clean-card" style="padding: 16px;">
+                      {% if module.data.title %}
+                      <div class="module-title">{{ module.data.title }}</div>
+                      {% endif %}
+                      {% for notification in module.data.notifications %}
+                      <div class="notification-card {{ notification.type }}">
+                          <div class="notification-header">
+                              <i class="fas fa-{{ notification.icon }} notification-icon"></i>
+                              <span class="notification-title">{{ notification.title }}</span>
+                          </div>
+                          <div class="notification-content">{{ notification.content }}</div>
+                      </div>
+                      {% endfor %}
+                  </div>
+                  
+                  <!-- 时间轴卡片模块 -->
+                  {% elif module.type == 'timeline' %}
+                  <div class="timeline-card">
+                      {% if module.data.title %}
+                      <div class="module-title">{{ module.data.title }}</div>
+                      {% endif %}
+                      {% for item in module.data.timeline_items %}
+                      <div class="timeline-item">
+                          <div class="timeline-time">{{ item.time }}</div>
+                          <div class="timeline-title">{{ item.title }}</div>
+                          <div class="timeline-desc">{{ item.description }}</div>
+                      </div>
+                      {% endfor %}
+                  </div>
+                  
+                  <!-- 特色数据卡片模块 -->
+                  {% elif module.type == 'feature' %}
+                  <div class="feature-card">
+                      <div class="feature-icon">
+                          <i class="fas fa-{{ module.data.icon }}"></i>
+                      </div>
+                      <div class="feature-title">{{ module.data.title }}</div>
+                      <div class="feature-desc">{{ module.data.description }}</div>
+                  </div>
+                  
+                  <!-- 雷达图模块 -->
+                  {% elif module.type == 'radar' %}
+                  <div class="dashboard-chart">
+                      <div class="chart-header">
+                          <div>
+                              <div class="chart-title">{{ module.data.title }}</div>
+                              {% if module.data.subtitle %}
+                              <div class="chart-subtitle">{{ module.data.subtitle }}</div>
+                              {% endif %}
+                          </div>
+                      </div>
+                      <div id="radarChart{{ module_id }}" class="chart-box"></div>
+                  </div>
+                  
+                  {% else %}
+                  <!-- 未知模块类型 -->
+                  <div class="clean-card bg-red-50">
+                      <p class="text-red-600">未知模块类型: {{ module.type }}</p>
+                  </div>
+                  {% endif %}
+                  
+              {% endfor %}
+          </div>
+          {% endfor %}
+      </div>
+
+      <script>
+          const colors = ['#3b82f6', '#06b6d4', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#6366f1'];
+          const allCharts = [];
+          
+          {% for row in config.rows %}
+          {% set row_index = loop.index0 %}
+          {% for module in row.modules %}
+          {% set module_id = row_index ~ '_' ~ loop.index0 %}
+          
+          {% if module.type == 'pie' %}
+          // 环形图
+          (function() {
+              const chart = echarts.init(document.getElementById('pieChart{{ module_id }}'));
+              const pieData = {{ module.data.data | tojson }};
+              const totalValue = pieData.reduce((sum, item) => sum + item.value, 0);
+              const totalValueStr = {{ module.data.center_value_formatter | tojson }};
+              
+              const option = {
+                  color: colors,
+                  title: {
+                      text: eval(totalValueStr)(totalValue),
+                      subtext: '{{ module.data.center_label }}',
+                      left: 'center',
+                      top: '42%',
+                      textStyle: { fontSize: 28, fontWeight: 'bold', color: '#1f2937' },
+                      subtextStyle: { fontSize: 12, color: '#6b7280' },
+                      itemGap: 4
+                  },
+                  tooltip: { 
+                      trigger: 'item',
+                      formatter: '{b}: {c}<br/>占比: {d}%',
+                      backgroundColor: 'rgba(255,255,255,0.95)',
+                      borderColor: '#e5e7eb',
+                      borderWidth: 1,
+                      textStyle: { 
+                          color: '#374151',
+                          fontWeight: 'bold'
+                      },
+                      extraCssText: 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'
+                  },
+                  legend: { 
+                      bottom: 0, 
+                      left: 'center', 
+                      itemWidth: 10, 
+                      itemHeight: 10,
+                      itemGap: 12,
+                      textStyle: { 
+                          fontSize: 13,
+                          color: '#374151'
+                      }
+                  },
+                  series: [{
+                      name: '{{ module.data.series_name }}',
+                      type: 'pie',
+                      radius: ['55%', '75%'],
+                      center: ['50%', '48%'],
+                      avoidLabelOverlap: false,
+                      label: { show: false },
+                      labelLine: { show: false },
+                      emphasis: { 
+                          scale: true, 
+                          scaleSize: 5
+                      },
+                      data: pieData,
+                      itemStyle: { 
+                          borderColor: '#fff', 
+                          borderWidth: 2,
+                          borderRadius: 8
+                      }
+                  }]
+              };
+              chart.setOption(option);
+              allCharts.push(chart);
+          })();
+          {% endif %}
+          
+          {% if module.type == 'line' %}
+          // 折线图（多折线）
+          (function() {
+              const chart = echarts.init(document.getElementById('lineChart{{ module_id }}'));
+              const categories = {{ module.data.categories | tojson }};
+              const seriesData = {{ module.data.series | tojson }};
+              
+              // 数值格式化函数
+              function formatValue(value) {
+                  if (value >= 1000000000000) {
+                      // 万亿级别
+                      const wanyi = value / 1000000000000;
+                      return wanyi >= 10 ? wanyi.toFixed(1) : wanyi.toFixed(2);
+                  } else if (value >= 100000000) {
+                      // 亿级别
+                      const yi = value / 100000000;
+                      return yi >= 100 ? yi.toFixed(1) : yi.toFixed(2);
+                  } else if (value >= 10000) {
+                      // 万级别
+                      const wan = value / 10000;
+                      return wan >= 100 ? wan.toFixed(0) : wan.toFixed(1);
+                  } else {
+                      return value.toLocaleString('zh-CN');
+                  }
+              }
+              
+              function getUnit(value) {
+                  if (value >= 1000000000000) return '万亿';
+                  if (value >= 100000000) return '亿';
+                  if (value >= 10000) return '万';
+                  return '';
+              }
+              
+              // 找出所有数据的最大值，确定单位
+              let maxValue = 0;
+              seriesData.forEach(s => {
+                  const seriesMax = Math.max(...s.data);
+                  if (seriesMax > maxValue) maxValue = seriesMax;
+              });
+              const unit = getUnit(maxValue);
+              const divisor = maxValue >= 1000000000000 ? 1000000000000 :
+                            maxValue >= 100000000 ? 100000000 :
+                            maxValue >= 10000 ? 10000 : 1;
+              
+              const option = {
+                  grid: { 
+                      left: '2%', 
+                      right: '2%', 
+                      bottom: {{ module.data.xaxis_name | tojson }} ? '12%' : '5%',  // X轴有标签时预留更多空间
+                      top: '15%', 
+                      containLabel: true 
+                  },
+                  tooltip: { 
+                      trigger: 'axis',
+                      axisPointer: { type: 'cross' },
+                      backgroundColor: 'rgba(255,255,255,0.95)',
+                      borderColor: '#e5e7eb',
+                      borderWidth: 1,
+                      textStyle: { color: '#374151' },
+                      extraCssText: 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);',
+                      formatter: function(params) {
+                          let result = params[0].axisValue + '<br/>';
+                          params.forEach(param => {
+                              const originalValue = param.value * divisor;
+                              result += param.marker + ' ' + param.seriesName + ': ' + 
+                                      formatValue(originalValue) + getUnit(originalValue) + '<br/>';
+                          });
+                          return result;
+                      }
+                  },
+                  legend: {
+                      data: seriesData.map(s => s.name),
+                      top: '2%',
+                      textStyle: { color: '#6b7280' }
+                  },
+                  xAxis: { 
+                      type: 'category', 
+                      data: categories,
+                      axisLine: { show: false },
+                      axisTick: { show: false },
+                      axisLabel: { color: '#6b7280' },
+                      name: {{ module.data.xaxis_name | tojson }} || '',
+                      nameLocation: 'middle',
+                      nameGap: 35,  // 增加间距，避免与刻度标签重叠
+                      nameTextStyle: {
+                          color: '#6b7280',
+                          fontSize: 12,
+                          fontWeight: 500
+                      }
+                  },
+                  yAxis: { 
+                      type: 'value',
+                      name: {{ module.data.yaxis_name | tojson }} ? {{ module.data.yaxis_name | tojson }} + (unit ? ' (单位：' + unit + ')' : '') : (unit ? '单位：' + unit : ''),
+                      nameLocation: 'end',  // 标签放在Y轴顶部
+                      nameGap: 10,          // 与轴的间距
+                      nameTextStyle: {
+                          color: '#9ca3af',
+                          fontSize: 12,
+                          align: 'left',    // 左对齐，与数字对齐
+                          padding: [0, 0, 5, 0]  // 上右下左，底部留5px间距
+                      },
+                      splitLine: { lineStyle: { color: '#f3f4f6' } },
+                      axisLabel: { 
+                          color: '#9ca3af',
+                          formatter: function(value) {
+                              if (value === 0) return '0';
+                              return value.toLocaleString('zh-CN');
+                          }
+                      }
+                  },
+                  series: seriesData.map(s => ({
+                      name: s.name,
+                      type: 'line',
+                      smooth: true,
+                      showSymbol: true,
+                      symbol: 'circle',
+                      symbolSize: 6,
+                      itemStyle: { 
+                          color: s.color,
+                          borderWidth: 2,
+                          borderColor: '#fff'
+                      },
+                      lineStyle: { 
+                          width: 3,
+                          shadowColor: s.color,
+                          shadowBlur: 8
+                      },
+                      areaStyle: s.showArea ? {
+                          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                              {offset: 0, color: s.areaColorStart || (s.color + '40')}, 
+                              {offset: 1, color: s.areaColorEnd || (s.color + '00')}
+                          ])
+                      } : undefined,
+                      emphasis: {
+                          focus: 'series',
+                          itemStyle: {
+                              shadowBlur: 10,
+                              shadowColor: s.color
+                          }
+                      },
+                      data: s.data.map(v => v / divisor)
+                  }))
+              };
+              chart.setOption(option);
+              allCharts.push(chart);
+          })();
+          {% endif %}
+          
+          {% if module.type == 'bar' %}
+          // 条形图
+          (function() {
+              const chart = echarts.init(document.getElementById('barChart{{ module_id }}'));
+              const barData = {{ module.data.data | tojson }};
+              
+              // 智能计算标签最大长度和截断策略
+              const maxNameLength = Math.max(...barData.map(item => item.name.length));
+              const avgNameLength = barData.reduce((sum, item) => sum + item.name.length, 0) / barData.length;
+              
+              // 根据文字长度动态调整左侧边距
+              let leftMargin = '15%';
+              if (maxNameLength > 12) {
+                  leftMargin = '20%';  // 超长文字增加边距
+              } else if (maxNameLength > 8) {
+                  leftMargin = '18%';  // 中长文字适度增加
+              }
+              
+              // 动态计算每个标签的最大字符数（避免超出边界）
+              let maxChars = 10;  // 默认最大10个字符
+              if (maxNameLength > 15) {
+                  maxChars = 8;
+              } else if (maxNameLength > 12) {
+                  maxChars = 9;
+              }
+              
+              // 截断过长的标签（完整名称保留在tooltip中）
+              const truncatedNames = barData.map(item => 
+                  item.name.length > maxChars ? item.name.substring(0, maxChars) + '...' : item.name
+              );
+              
+              const option = {
+                  grid: { 
+                      left: leftMargin, 
+                      right: '15%', 
+                      bottom: '2%', 
+                      top: '5%', 
+                      containLabel: true 
+                  },
+                  tooltip: { 
+                      trigger: 'axis',
+                      backgroundColor: 'rgba(255,255,255,0.95)',
+                      borderColor: '#e5e7eb',
+                      borderWidth: 1,
+                      textStyle: { color: '#374151' },
+                      extraCssText: 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);',
+                      formatter: function(params) {
+                          const dataIndex = params[0].dataIndex;
+                          // 显示完整的名称（未截断）
+                          return '<strong>' + barData[dataIndex].name + '</strong>: ' + params[0].value + 
+                                '{{ module.data.label_formatter }}'.replace('{c}', '');
+                      }
+                  },
+                  xAxis: { 
+                      type: 'value',
+                      show: false
+                  },
+                  yAxis: { 
+                      type: 'category', 
+                      data: barData.map(item => item.name),
+                      axisLine: { show: false },
+                      axisTick: { show: false },
+                      axisLabel: { show: false }
+                  },
+                  series: [{
+                      type: 'bar',
+                      barWidth: '60%',
+                      data: barData.map((item, index) => ({
+                          value: item.value,
+                          itemStyle: {
+                              color: item.value < 0 
+                                  ? new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                      {offset: 0, color: '#ef4444'}, 
+                                      {offset: 1, color: '#fca5a5'}
+                                    ])
+                                  : new echarts.graphic.LinearGradient(1, 0, 0, 0, [
+                                      {offset: 0, color: '#6366f1'}, 
+                                      {offset: 1, color: '#a5b4fc'}
+                                    ]),
+                              borderRadius: item.value < 0 ? [3, 0, 0, 3] : [0, 3, 3, 0]
+                          },
+                          label: {
+                              show: true,
+                              position: item.value >= 0 ? 'left' : 'right',
+                              formatter: truncatedNames[index],  // 使用截断后的名称
+                              color: '#374151',
+                              fontWeight: 600,
+                              fontSize: 13,
+                              textShadowColor: 'rgba(0, 0, 0, 0.1)',
+                              textShadowBlur: 2,
+                              textShadowOffsetX: 1,
+                              textShadowOffsetY: 1,
+                              padding: item.value >= 0 ? [0, 8, 0, 0] : [0, 0, 0, 8],
+                              overflow: 'truncate',  // ECharts 5.x 支持文本截断
+                              width: leftMargin === '20%' ? 120 : leftMargin === '18%' ? 100 : 80  // 根据边距设置宽度
+                          }
+                      })),
+                      showBackground: true,
+                      backgroundStyle: { 
+                          color: '#f3f4f6',
+                          borderRadius: [0, 3, 3, 0]
+                      }
+                  }, {
+                      type: 'bar',
+                      barWidth: '60%',
+                      barGap: '-100%',
+                      data: barData.map((item, index) => ({
+                          value: item.value,
+                          label: {
+                              show: true,
+                              position: item.value >= 0 ? 'right' : 'left',
+                              formatter: '{{ module.data.label_formatter }}',
+                              color: '#374151',
+                              fontWeight: 'bold',
+                              fontSize: 13,
+                              textShadowColor: 'rgba(0, 0, 0, 0.1)',
+                              textShadowBlur: 2,
+                              textShadowOffsetX: 1,
+                              textShadowOffsetY: 1,
+                              padding: item.value >= 0 ? [0, 0, 0, 8] : [0, 8, 0, 0]
+                          }
+                      })),
+                      itemStyle: { color: 'transparent' },
+                      tooltip: { show: false }
+                  }]
+              };
+              chart.setOption(option);
+              allCharts.push(chart);
+          })();
+          {% endif %}
+          
+          {% if module.type == 'column' %}
+          // 柱状图（多组数据）
+          (function() {
+              const chart = echarts.init(document.getElementById('columnChart{{ module_id }}'));
+              const categories = {{ module.data.categories | tojson }};
+              const seriesData = {{ module.data.series | tojson }};
+              
+              // 数值格式化函数
+              function formatValue(value) {
+                  if (value >= 1000000000000) {
+                      const wanyi = value / 1000000000000;
+                      return wanyi >= 10 ? wanyi.toFixed(1) : wanyi.toFixed(2);
+                  } else if (value >= 100000000) {
+                      const yi = value / 100000000;
+                      return yi >= 100 ? yi.toFixed(1) : yi.toFixed(2);
+                  } else if (value >= 10000) {
+                      const wan = value / 10000;
+                      return wan >= 100 ? wan.toFixed(0) : wan.toFixed(1);
+                  } else {
+                      return value.toLocaleString('zh-CN');
+                  }
+              }
+              
+              function getUnit(value) {
+                  if (value >= 1000000000000) return '万亿';
+                  if (value >= 100000000) return '亿';
+                  if (value >= 10000) return '万';
+                  return '';
+              }
+              
+              // 找出所有数据的最大值，确定单位
+              let maxValue = 0;
+              seriesData.forEach(s => {
+                  const seriesMax = Math.max(...s.data);
+                  if (seriesMax > maxValue) maxValue = seriesMax;
+              });
+              const unit = getUnit(maxValue);
+              const divisor = maxValue >= 1000000000000 ? 1000000000000 :
+                            maxValue >= 100000000 ? 100000000 :
+                            maxValue >= 10000 ? 10000 : 1;
+              
+              // 智能截断X轴标签
+              const maxLabelLength = Math.max(...categories.map(cat => cat.length));
+              const avgLabelLength = categories.reduce((sum, cat) => sum + cat.length, 0) / categories.length;
+              
+              // 根据类别数量和标签长度，动态计算每个标签的最大字符数
+              let maxChars = 8;  // 默认最大8个字符
+              if (categories.length > 12) {
+                  maxChars = 5;
+              } else if (categories.length > 8) {
+                  maxChars = 6;
+              } else if (avgLabelLength > 10) {
+                  maxChars = 7;
+              }
+              
+              // 创建原始标签映射，用于tooltip显示
+              const originalCategories = [...categories];
+              const truncatedCategories = categories.map(cat => 
+                  cat.length > maxChars ? cat.substring(0, maxChars) + '...' : cat
+              );
+              
+              const option = {
+                  grid: { 
+                      left: '2%', 
+                      right: '2%', 
+                      bottom: {{ module.data.xaxis_name | tojson }} ? '12%' : '5%',
+                      top: '15%', 
+                      containLabel: true 
+                  },
+                  tooltip: { 
+                      trigger: 'axis',
+                      axisPointer: { type: 'shadow' },
+                      backgroundColor: 'rgba(255,255,255,0.95)',
+                      borderColor: '#e5e7eb',
+                      borderWidth: 1,
+                      textStyle: { color: '#374151' },
+                      extraCssText: 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);',
+                      formatter: function(params) {
+                          // 显示完整的类别名称
+                          const categoryIndex = params[0].dataIndex;
+                          const fullCategoryName = originalCategories[categoryIndex];
+                          let result = '<strong>' + fullCategoryName + '</strong><br/>';
+                          params.forEach(param => {
+                              const originalValue = param.value * divisor;
+                              result += param.marker + ' ' + param.seriesName + ': ' + 
+                                      formatValue(originalValue) + getUnit(originalValue) + '<br/>';
+                          });
+                          return result;
+                      }
+                  },
+                  legend: {
+                      data: seriesData.map(s => s.name),
+                      top: '2%',
+                      textStyle: { color: '#6b7280' }
+                  },
+                  xAxis: { 
+                      type: 'category', 
+                      data: truncatedCategories,
+                      axisLine: { show: false },
+                      axisTick: { show: false },
+                      axisLabel: { 
+                          color: '#6b7280',
+                          interval: 0,
+                          fontSize: 12
+                      },
+                      name: {{ module.data.xaxis_name | tojson }} || '',
+                      nameLocation: 'middle',
+                      nameGap: 35,
+                      nameTextStyle: {
+                          color: '#6b7280',
+                          fontSize: 12,
+                          fontWeight: 500
+                      }
+                  },
+                  yAxis: { 
+                      type: 'value',
+                      name: {{ module.data.yaxis_name | tojson }} ? {{ module.data.yaxis_name | tojson }} + (unit ? ' (单位：' + unit + ')' : '') : (unit ? '单位：' + unit : ''),
+                      nameLocation: 'end',  // 标签放在Y轴顶部
+                      nameGap: 10,          // 与轴的间距
+                      nameTextStyle: {
+                          color: '#9ca3af',
+                          fontSize: 12,
+                          align: 'left',    // 左对齐，与数字对齐
+                          padding: [0, 0, 5, 0]  // 上右下左，底部留5px间距
+                      },
+                      splitLine: { lineStyle: { color: '#f3f4f6' } },
+                      axisLabel: { 
+                          color: '#9ca3af',
+                          formatter: function(value) {
+                              if (value === 0) return '0';
+                              return value.toLocaleString('zh-CN');
+                          }
+                      }
+                  },
+                  series: seriesData.map(s => ({
+                      name: s.name,
+                      type: 'bar',
+                      barMaxWidth: 40,
+                      itemStyle: {
+                          color: s.color,
+                          borderRadius: [4, 4, 0, 0]
+                      },
+                      emphasis: {
+                          itemStyle: {
+                              shadowBlur: 10,
+                              shadowColor: 'rgba(0, 0, 0, 0.3)'
+                          }
+                      },
+                      data: s.data.map(v => v / divisor)
+                  }))
+              };
+              chart.setOption(option);
+              allCharts.push(chart);
+          })();
+          {% endif %}
+          
+          {% if module.type == 'radar' %}
+          // 雷达图
+          (function() {
+              const chart = echarts.init(document.getElementById('radarChart{{ module_id }}'));
+              const chartData = {{ module.data | tojson }};
+              
+              const option = {
+                  tooltip: {
+                      show: true,
+                      trigger: 'item',
+                      backgroundColor: 'rgba(255,255,255,0.95)',
+                      borderColor: '#e5e7eb',
+                      borderWidth: 1,
+                      textStyle: { color: '#374151' },
+                      extraCssText: 'box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);'
+                  },
+                  radar: {
+                      indicator: chartData.indicators,
+                      shape: 'circle',
+                      splitNumber: 5,
+                      axisName: { 
+                          color: '#4b5563',
+                          fontSize: 12
+                      },
+                      splitLine: { 
+                          lineStyle: { 
+                              color: '#e5e7eb' 
+                          } 
+                      },
+                      splitArea: { show: false }
+                  },
+                  series: [{
+                      name: chartData.series_name || '数据',
+                      type: 'radar',
+                      data: chartData.data,
+                      areaStyle: { opacity: 0.3 },
+                      lineStyle: { width: 2 },
+                      symbol: 'circle',
+                      symbolSize: 4,
+                      emphasis: {
+                          lineStyle: { width: 3 },
+                          areaStyle: { opacity: 0.5 }
+                      }
+                  }]
+              };
+              
+              chart.setOption(option);
+              allCharts.push(chart);
+          })();
+          {% endif %}
+          
+          {% endfor %}
+          {% endfor %}
+          
+          // 响应式调整
+          window.addEventListener('resize', () => {
+              allCharts.forEach(chart => chart.resize());
+          });
+      </script>
+  </body>
+  </html>

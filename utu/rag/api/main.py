@@ -239,6 +239,66 @@ def register_basic_routes(app: FastAPI):
         if not logo_file.exists():
             raise HTTPException(status_code=404, detail="Logo file not found")
         return FileResponse(logo_file)
+    
+    @app.get("/api/local-file-proxy")
+    async def local_file_proxy(path: str):
+        """
+        本地文件代理接口，用于在浏览器中显示本地文件系统的图片等资源
+        
+        Query Parameters:
+            path: 本地文件的绝对路径
+        
+        Returns:
+            FileResponse: 文件内容
+        
+        Example:
+            GET /api/local-file-proxy?path=/tmp/utu/python_executor/xxx/charts/chart.png
+        """
+        from pathlib import Path
+        import mimetypes
+        
+        try:
+            file_path = Path(path)
+            
+            # 安全检查：确保文件存在且是文件
+            if not file_path.exists():
+                raise HTTPException(status_code=404, detail=f"File not found: {path}")
+            
+            if not file_path.is_file():
+                raise HTTPException(status_code=400, detail=f"Path is not a file: {path}")
+            
+            # 安全检查：只允许访问临时目录和项目目录的文件
+            allowed_prefixes = [
+                "/tmp/utu",
+                "/tmp/minio",
+                "/private/tmp/utu",
+                str(settings.PROJECT_ROOT),
+            ]
+            
+            path_str = str(file_path.absolute())
+            if not any(path_str.startswith(prefix) for prefix in allowed_prefixes):
+                raise HTTPException(
+                    status_code=403, 
+                    detail="Access denied: File path not in allowed directories"
+                )
+            
+            # 获取 MIME 类型
+            mime_type, _ = mimetypes.guess_type(str(file_path))
+            if mime_type is None:
+                mime_type = "application/octet-stream"
+            
+            # 返回文件
+            return FileResponse(
+                path=file_path,
+                media_type=mime_type,
+                filename=file_path.name
+            )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error serving local file {path}: {e}")
+            raise HTTPException(status_code=500, detail=f"Error serving file: {str(e)}")
 
     # SPA frontend routing (must be last as catch-all)
     @app.get("/{full_path:path}")

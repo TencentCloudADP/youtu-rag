@@ -230,7 +230,7 @@ async def auto_select_and_stream(request: ChatRequest):
                 ):
                     yield chunk
 
-                yield f"data: {json.dumps({'type': 'delta', 'content': f'\\n✅ {agent_name} 执行完成\\n'}, ensure_ascii=False)}\n\n"
+                # yield f"data: {json.dumps({'type': 'delta', 'content': f'\\n✅ {agent_name} 执行完成\\n'}, ensure_ascii=False)}\n\n"
 
             except Exception as e:
                 logger.error(f"Failed to execute agent {agent_name}: {str(e)}", exc_info=True)

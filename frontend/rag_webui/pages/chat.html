@@ -249,6 +249,7 @@
   gap: var(--spacing-md);
   animation: slideIn 0.3s ease;
   max-width: 85%;
+  min-width: 0; /* Allow flex items to shrink */
 }
 
 @keyframes slideIn {
@@ -289,6 +290,11 @@
 
 .message-content {
   flex: 1;
+  min-width: 0; /* Allow content to shrink and wrap */
+  overflow: visible; /* Allow copy button to be visible */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .message.user .message-content {
@@ -297,14 +303,26 @@
   align-items: flex-end;
 }
 
+.message.assistant .message-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .message-bubble {
   background-color: #f0f0f0;
   padding: 8px 16px;
   border-radius: 16px;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid #e5e5e5;
   position: relative;
+  max-width: 100%;
+  overflow: hidden; /* Prevent content overflow */
+  contain: layout style;
+  will-change: contents;
 }
 
 .message.user .message-bubble {
@@ -316,7 +334,24 @@
 .message-time {
   font-size: 11px;
   color: #999;
-  margin-top: 6px;
+}
+
+/* Message Footer - Contains copy button and timestamp in same row */
+.message-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* For user messages: copy button first, then timestamp (copy on left, time on right) */
+.message.user .message-footer {
+  flex-direction: row;
+}
+
+/* For assistant messages: timestamp first, then copy button (time on left, copy on right) */
+.message.assistant .message-footer {
+  flex-direction: row-reverse;
 }
 
 /* Attachment Display Area */
@@ -595,7 +630,11 @@
   padding: var(--spacing-md);
   border-radius: var(--radius-sm);
   overflow-x: auto;
+  overflow-y: hidden;
   margin: 6px 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .markdown-content code {
@@ -644,6 +683,9 @@
   font-size: 14px;
   border-collapse: collapse;
   margin: 6px 0;
+  width: 100%;
+  table-layout: fixed;
+  overflow-wrap: break-word;
 }
 
 .markdown-content th,
@@ -659,6 +701,34 @@
   padding-left: var(--spacing-md);
   margin: 6px 0;
   color: var(--gray-7);
+}
+
+/* Markdown Image Styles */
+.markdown-content img,
+.markdown-image {
+  max-width: 500px;
+  width: auto;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 8px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.markdown-content img:hover,
+.markdown-image:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* 响应式：小屏幕上图片最大宽度调整为 100% */
+@media (max-width: 768px) {
+  .markdown-content img,
+  .markdown-image {
+    max-width: 100%;
+  }
 }
 
 /* Stop Button Styles */
@@ -677,21 +747,29 @@
   margin: var(--spacing-sm) 0;
 }
 
-/* Copy Button Styles */
+/* Copy Button Styles - Outside bubble */
 .copy-btn {
-  position: absolute;
-  bottom: -8px;
-  right: -8px;
   background: white;
   border: 1px solid var(--gray-4);
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 12px;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1; /* Always visible */
   transition: all 0.2s ease;
   color: var(--gray-8);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+/* Position copy button for assistant messages (left side) */
+.message.assistant .copy-btn {
+  align-self: flex-start;
+}
+
+/* Position copy button for user messages (right side) */
+.message.user .copy-btn {
+  align-self: flex-end;
 }
 
 .message-bubble {
@@ -716,10 +794,6 @@
   font-size: 13px !important;
 }
 
-.message-bubble:hover .copy-btn {
-  opacity: 1;
-}
-
 .copy-btn:hover {
   background: var(--gray-4);
   border-color: var(--gray-5);
@@ -738,7 +812,7 @@
 }
 
 .message.final-answer .copy-btn {
-  background: var(--gray-3);
+  background: white;
   border-color: var(--gray-4);
   color: var(--gray-8);
 }
@@ -1167,6 +1241,104 @@ input:checked + .slider:before {
 
 .switch:hover input:checked + .slider {
   background-color: #059669;
+}
+
+/* ========== File Links in Markdown ========== */
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.file-link:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46a0 100%);
+}
+
+.file-link-html {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.file-link-html:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+}
+
+.file-link-md,
+.file-link-txt {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.file-link-md:hover,
+.file-link-txt:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.file-link-xlsx,
+.file-link-xls,
+.file-link-csv {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.file-link-xlsx:hover,
+.file-link-xls:hover,
+.file-link-csv:hover {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+.file-link-pdf {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.file-link-pdf:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+/* 注意：Image Lightbox 样式已在 components.css 中定义，此处已删除重复定义 */
+
+/* ========== Image Load Error ========== */
+.image-load-error {
+  display: inline-block;
+  padding: 12px 16px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #c33;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.image-load-error small {
+  display: block;
+  margin-top: 4px;
+  color: #999;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+/* ========== Utility Classes for Layout ========== */
+.flex-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header-flex {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.execution-card .execution-card-body {
+  contain: layout style;
 }
 
 </style>

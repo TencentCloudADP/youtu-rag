@@ -1,14 +1,14 @@
 """Vector store implementations."""
 
 from .chroma_store import ChromaVectorStore
-from utu.rag.storage.implementations.memory_store import (
-    EmbeddingConfig,
-    EmbeddingService,
-    MemoryVectorStore,
-)
+from .memory_store import MemoryVectorStore, EmbeddingService
 
-__all__ = ["ChromaVectorStore", 
-            "EmbeddingConfig",
-            "EmbeddingService",
-            "MemoryVectorStore",
+# Re-export embedding utilities for backward compatibility
+from utu.rag.embeddings import create_embedder
+
+__all__ = [
+    "ChromaVectorStore",
+    "MemoryVectorStore",
+    "EmbeddingService",
+    "create_embedder",
 ]

@@ -1,0 +1,54 @@
+# @package _global_
+# Excel分析编排Agent配置
+# 基于OrchestratorAgent实现多阶段分析流程
+
+defaults:
+  - /model/base@orchestrator_model
+  - /agents/router/force_plan@orchestrator_router
+  - /agents/ragref/excel_analysis/excel_analysis@orchestrator_workers.ExcelAnalysisAgent
+  - /agents/ragref/excel_analysis/markdown_report@orchestrator_workers.MarkdownReportAgent
+  - /agents/ragref/excel_analysis/dashboard@orchestrator_workers.DashboardAgent
+  - _self_
+
+type: orchestrator
+
+orchestrator_config:
+  name: ExcelAnalysisOrchestrator
+  examples_path: plan_examples/excel.json  # 任务分解示例
+  add_chitchat_subagent: false  # 不添加闲聊子agent
+  additional_instructions: |
+    
+    **重要：在制定plan之前，必须先执行异常判断**
+    
+    ## 异常判断流程（必须首先执行）
+    
+    在制定任何执行计划前，你必须先完成以下检查：
+    1. 检查用户问题是否与表格数据分析相关
+    2. 检查是否提供了有效的文件路径（Excel、CSV等格式）
+    3. 你可以根据问题内容直接判断，无需调用子Agent或工具
+    
+    **如果发现任何异常情况**（如：问题不相关、未提供文件路径、文件格式不支持等），则：
+    - 在回复的**结尾部分**输出用 `<feedback></feedback>` 标签包裹的反馈内容
+    - 反馈内容应礼貌说明问题所在，并给出正确的使用指引
+    
+    示例格式：
+    ```
+    <feedback>
+    抱歉，我注意到您的问题可能不适合使用表格分析功能。请选定一个Excel或CSV文件进行分析，并说明您想要分析的具体内容。
+    </feedback>
+    ```
+    ```
+    <feedback>
+    抱歉，您并未选择或上传具体的表格文件，请选定您要分析的文件。
+    </feedback>
+    ```
+
+# 子助手信息描述
+orchestrator_workers_info:
+  - name: ExcelAnalysisAgent
+    description: 负责Excel表格的深度理解与分析，识别表头、清洗数据、执行多维度统计分析
+  - name: MarkdownReportAgent
+    description: 根据表格分析结果生成图文并茂的Markdown分析报告
+  - name: DashboardAgent
+    description: 将Markdown报告转换为交互式网页数据看板（HTML格式）
+

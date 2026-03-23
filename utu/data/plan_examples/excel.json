@@ -1,0 +1,89 @@
+[
+    {
+        "question": "帮我分析一下这个销售数据表格 /data/sales_report_2024.xlsx，生成一份详细的分析报告，并且做成网页看板方便领导查看",
+        "available_agents": [
+            {
+                "name": "ExcelAnalysisAgent",
+                "description": "负责Excel表格的深度理解与分析，识别表头、清洗数据、执行多维度统计分析"
+            },
+            {
+                "name": "MarkdownReportAgent",
+                "description": "根据表格分析结果生成图文并茂的Markdown分析报告"
+            },
+            {
+                "name": "DashboardAgent",
+                "description": "将Markdown报告转换为交互式网页数据看板（HTML格式）"
+            }
+        ],
+        "analysis": "用户提供了Excel文件路径，需要完整的分析流程：先深度解析表格，生成Markdown报告，最后根据用户明确要求生成网页看板。这是一个典型的多阶段Excel分析任务，需要按顺序执行表格理解→报告生成→看板制作。",
+        "plan": [
+            {"name": "ExcelAnalysisAgent", "task": "深度解析文件 /data/sales_report_2024.xlsx，识别表头结构、处理总计行、清洗数据并进行多维度统计分析（按地区、产品类别、时间等维度）"},
+            {"name": "MarkdownReportAgent", "task": "基于ExcelAnalysisAgent的分析结果，生成图文并茂的Markdown销售分析报告，包含数据概览、趋势分析、关键发现和可视化图表"},
+            {"name": "DashboardAgent", "task": "将生成的Markdown报告转换为交互式HTML网页看板，便于领导在浏览器中查看销售数据"}
+        ]
+    },
+    {
+        "question": "我有一个员工考勤表 attendance.csv，帮我看看这个月的出勤情况",
+        "available_agents": [
+            {
+                "name": "ExcelAnalysisAgent",
+                "description": "负责Excel表格的深度理解与分析，识别表头、清洗数据、执行多维度统计分析"
+            },
+            {
+                "name": "MarkdownReportAgent",
+                "description": "根据表格分析结果生成图文并茂的Markdown分析报告"
+            },
+            {
+                "name": "DashboardAgent",
+                "description": "将Markdown报告转换为交互式网页数据看板（HTML格式）"
+            }
+        ],
+        "analysis": "用户提供了CSV文件路径，询问考勤情况。这是一个基础的Excel分析任务，需要执行表格理解和报告生成两个必须阶段，后续加工（网页看板）暂不需要，除非用户明确要求。",
+        "plan": [
+            {"name": "ExcelAnalysisAgent", "task": "分析文件 attendance.csv，识别考勤表结构（员工姓名、日期、出勤状态等字段），统计本月出勤率、缺勤次数、迟到早退情况等关键指标"},
+            {"name": "MarkdownReportAgent", "task": "根据ExcelAnalysisAgent的考勤分析结果，生成本月考勤情况的Markdown报告，包含出勤统计、异常情况汇总和可视化图表"}
+        ]
+    },
+    {
+        "question": "刚才的销售报告能不能也做成网页看板？我想给团队演示",
+        "available_agents": [
+            {
+                "name": "ExcelAnalysisAgent",
+                "description": "负责Excel表格的深度理解与分析，识别表头、清洗数据、执行多维度统计分析"
+            },
+            {
+                "name": "MarkdownReportAgent",
+                "description": "根据表格分析结果生成图文并茂的Markdown分析报告"
+            },
+            {
+                "name": "DashboardAgent",
+                "description": "将Markdown报告转换为交互式网页数据看板（HTML格式）"
+            }
+        ],
+        "analysis": "用户在历史对话中已经生成过销售报告（假设路径为 /output/sales_report.md），现在只需要将报告转换为网页看板。可以直接调用DashboardAgent，无需重新分析表格或生成报告，实现智能复用。",
+        "plan": [
+            {"name": "DashboardAgent", "task": "将历史对话中生成的Markdown销售报告（/output/sales_report.md）转换为交互式HTML网页看板，便于团队演示和查看"}
+        ]
+    },
+    {
+        "question": "分析下表格数据，整理关键信息",
+        "available_agents": [
+            {
+                "name": "ExcelAnalysisAgent",
+                "description": "负责Excel表格的深度理解与分析，识别表头、清洗数据、执行多维度统计分析"
+            },
+            {
+                "name": "MarkdownReportAgent",
+                "description": "根据表格分析结果生成图文并茂的Markdown分析报告"
+            },
+            {
+                "name": "DashboardAgent",
+                "description": "将Markdown报告转换为交互式网页数据看板（HTML格式）"
+            }
+        ],
+        "analysis": "用户虽然提出了表格分析任务，但是没有给出具体的表格路径，因此无法执行具体分析。要向用户反馈并要求其提供表格文件",
+        "plan": []
+    }
+]
+
+

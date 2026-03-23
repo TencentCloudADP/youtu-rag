@@ -21,6 +21,7 @@ class Plan:
     input: str = ""
     analysis: str = ""
     tasks: list[Task] = field(default_factory=list)
+    feedback: str = ""
 
     def format_tasks(self) -> str:
         tasks = [{"name": t.agent_name, "task": t.task} for t in self.tasks]

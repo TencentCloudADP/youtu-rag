@@ -490,48 +490,69 @@ class ChatService:
         file_ids: Optional[list[str]] = None
     ) -> str:
         """Modify the query based on the agent's functionality, injecting necessary context information."""
+        
+        # Helper function to download files from knowledge base
+        def _download_kb_files(kb_id, file_ids, agent_type="ExcelAgent"):
+            """Download files from knowledge base and return file paths."""
+            if kb_id is None or not file_ids:
+                raise ValueError(f"⚠️ {agent_type} requires kb_id and file_ids parameters.")
+            
+            file_names = self._get_file_names_from_ids(file_ids)
+            if not file_names:
+                raise ValueError("⚠️ No valid file names found.")
+            
+            from ..minio_client import minio_client
+            
+            downloaded_paths = []
+            for file_name in file_names:
+                try:
+                    # Reusing cached file if available; otherwise download
+                    if minio_client.check_file_is_local(file_name):
+                        local_path = os.path.join(minio_client.tmp_dir, file_name)
+                        downloaded_paths.append(local_path)
+                        logger.info(f"Using cached file: {local_path}")
+                    else:
+                        local_path = minio_client.download_file_to_local(file_name)
+                        if local_path:
+                            downloaded_paths.append(local_path)
+                            logger.info(f"Downloaded KB file to: {local_path}")
+                        else:
+                            logger.error(f"Failed to download file: {file_name}")
+                except Exception as e:
+                    logger.error(f"Error downloading {file_name}: {e}")
+            
+            if not downloaded_paths:
+                raise ValueError("⚠️ Failed to download any files from knowledge base.")
+            
+            return ",".join(downloaded_paths)
 
+        # Handle ExcelAgent (legacy)
         if hasattr(self.agent, '__class__') and self.agent.__class__.__name__ == "ExcelAgent":
             # For Excel Agent, load the files and set the environment variable FILE_PATH.
             # Excel Agent reads file path from environment variable FILE_PATH.
-            if kb_id is not None and file_ids:
-                # Download files from knowledge base into temporary directory
-                file_names = self._get_file_names_from_ids(file_ids)
-                if file_names:
-                    from ..minio_client import minio_client
+            file_path_str = _download_kb_files(kb_id, file_ids, "ExcelAgent")
+            os.environ["FILE_PATH"] = file_path_str
+            logger.info(f"ExcelAgent: Set FILE_PATH={file_path_str}")
+            return query
 
-                    downloaded_paths = []
-                    for file_name in file_names:
-                        try:
-                            # Reusing cached file if available; otherwise download
-                            if minio_client.check_file_is_local(file_name):
-                                local_path = os.path.join(minio_client.tmp_dir, file_name)
-                                downloaded_paths.append(local_path)
-                                logger.info(f"Using cached file: {local_path}")
-                            else:
-                                local_path = minio_client.download_file_to_local(file_name)
-                                if local_path:
-                                    downloaded_paths.append(local_path)
-                                    logger.info(f"Downloaded KB file to: {local_path}")
-                                else:
-                                    logger.error(f"Failed to download file: {file_name}")
-                        except Exception as e:
-                            logger.error(f"Error downloading {file_name}: {e}")
-
-                    if downloaded_paths:
-                        file_path_str = ",".join(downloaded_paths)
-                        os.environ["FILE_PATH"] = file_path_str
-                        logger.info(f"ExcelAgent: Set FILE_PATH={file_path_str}")
-                        return query
-                    else:
-                        raise ValueError("⚠️ Failed to download any files from knowledge base.")
+        # Handle ExcelAnalysisOrchestrator
+        # ExcelAnalysisOrchestrator has direct 'name' attribute, while SimpleAgent uses 'config.agent.name'
+        agent_name = None
+        if hasattr(self.agent, 'name'):
+            agent_name = self.agent.name
+        elif hasattr(self.agent, 'config'):
+            agent_name = self.agent.config.agent.name
+        
+        if agent_name in ["ExcelAnalysisOrchestrator"]:
+            if kb_id is None or file_ids is None:
+                query = f"用户问题: {query}"
             else:
-                raise ValueError("⚠️ ExcelAgent requires kb_id and file_ids parameters.")
+                file_path_str = _download_kb_files(kb_id, file_ids, "ExcelAnalysisOrchestrator")
+                logger.info(f"ExcelAnalysisOrchestrator: Downloaded files to: {file_path_str}")
+                query = f"文件路径: {file_path_str}\n用户问题: {query}"
+            return query
 
-
-        agent_name = self.agent.config.agent.name
-
-        if agent_name in ["kb-search-agent"]:
+        if agent_name in ["kb-search-agent", "meta-retrieval-agent"]:
             # For KB Search Agent, inject kb_id and file_ids
             if kb_id is None:
                 raise ValueError("⚠️ KB Search Agent requires kb_id parameter. Please select a knowledge base.")

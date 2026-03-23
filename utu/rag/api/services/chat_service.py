@@ -552,7 +552,7 @@ class ChatService:
                 query = f"文件路径: {file_path_str}\n用户问题: {query}"
             return query
 
-        if agent_name in ["kb-search-agent"]:
+        if agent_name in ["kb-search-agent", "meta-retrieval-agent"]:
             # For KB Search Agent, inject kb_id and file_ids
             if kb_id is None:
                 raise ValueError("⚠️ KB Search Agent requires kb_id parameter. Please select a knowledge base.")

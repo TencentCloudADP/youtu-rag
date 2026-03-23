@@ -1,4 +1,4 @@
-name: kb_search
+name: text2sql_retrieval
 mode: builtin
 activated_tools: null
 
@@ -9,22 +9,19 @@ config:
   # For self-hosted embedding services (e.g., youtu-embedding-2B)
   embedding:
     backend: service
-    base_url: ${oc.env:UTU_EMBEDDING_URL}
+    base_url: ${oc.env:UTU_EMBEDDING_URL}  # e.g., http://9.206.34.16:8081
+    batch_size: 16
 
   # Option 2: OpenAI API Standard (API key required)
   # For OpenAI or OpenAI-compatible embedding APIs
   # embedding:
   #   backend: openai
-  #   model: ${oc.env:UTU_EMBEDDING_MODEL}
+  #   model: ${oc.env:UTU_EMBEDDING_MODEL}  # e.g., text-embedding-3-small
   #   api_key: ${oc.env:UTU_EMBEDDING_API_KEY}
-  #   base_url: ${oc.env:UTU_EMBEDDING_URL}
+  #   base_url: ${oc.env:UTU_EMBEDDING_URL}  # e.g., https://api.openai.com/v1
+  #   batch_size: 16
 
-  # Reranker configuration
-  reranker:
-    backend: jina
-    threshold: 0.5
-
-  # Vector store configuration
+  # Vector store configuration for text2sql
   vector_store:
     backend: chroma
     persist_directory: ${oc.env:VECTOR_STORE_PATH}

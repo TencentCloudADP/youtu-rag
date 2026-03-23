@@ -1,17 +1,19 @@
 """Vector memory store implementation for agent memory management.
 
-Includes:
-- MemoryVectorStore: ChromaDB-based vector store for memory storage
-- EmbeddingService: Text embedding generation service
+This module provides MemoryVectorStore, a ChromaDB-based vector store
+specialized for agent memory management.
+
+Embedding configuration is loaded from `configs/rag/default.yaml`.
 """
 
-import asyncio
 import logging
 import os
+import re
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
+import yaml
 
 try:
     import chromadb
@@ -25,96 +27,129 @@ except ImportError:
 
 from utu.rag.base import BaseVectorStore, Chunk, BaseEmbedder
 from utu.rag.config import VectorStoreConfig
-from utu.rag.embeddings.factory import EmbedderFactory
+
+# Re-export create_embedder for backward compatibility
+from utu.rag.embeddings import create_embedder
 
 
 logger = logging.getLogger(__name__)
 
-# ============== Embedding Service ==============
 
-class EmbeddingConfig(BaseModel):
-    """Configuration for embedding service."""
+def _load_rag_embedding_config(config_name: str = "default") -> dict[str, Any]:
+    """Load embedding configuration from RAG config file.
 
-    embedding_type: str = Field(default="local", description="Embedding type: 'local' or 'api'")
-    url: str = Field(default="", description="Embedding service URL")
-    model: str = Field(default="", description="Embedding model name")
-    api_key: str | None = Field(default=None, description="API key for API-based embedding")
-    batch_size: int = Field(default=32, description="Batch size for embedding requests")
+    Args:
+        config_name: Config file name (without .yaml extension).
+                    Defaults to "default" which loads configs/rag/default.yaml.
 
-    @classmethod
-    def from_env(cls) -> "EmbeddingConfig":
-        """Load configuration from environment variables."""
-        return cls(
-            embedding_type=os.getenv("UTU_EMBEDDING_TYPE", "local"),
-            url=os.getenv("UTU_EMBEDDING_URL", "http://localhost:8081"),
-            model=os.getenv("UTU_EMBEDDING_MODEL", "youtu-embedding-2b"),
-            api_key=os.getenv("UTU_EMBEDDING_API_KEY"),
-            batch_size=int(os.getenv("UTU_EMBEDDING_BATCH_SIZE", "32")),
-        )
+    Returns:
+        Embedding configuration dictionary with resolved environment variables.
+    """
+    try:
+        # Get project root (this file is in utu/rag/storage/implementations/)
+        current_file = Path(__file__)
+        project_root = current_file.parent.parent.parent.parent.parent
+        config_dir = project_root / "configs" / "rag"
+
+        config_path = config_dir / f"{config_name}.yaml"
+        if not config_path.exists():
+            config_path = config_dir / "default.yaml"
+
+        if not config_path.exists():
+            logger.warning(f"RAG config not found: {config_path}, using env defaults")
+            return {}
+
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+
+        # Resolve environment variables (e.g., ${UTU_EMBEDDING_MODEL} -> actual value)
+        def resolve_env_var(value):
+            if isinstance(value, str):
+                pattern = re.compile(r"\$\{([^}]+)\}")
+                matches = pattern.findall(value)
+                for var_name in matches:
+                    env_value = os.getenv(var_name, "")
+                    value = value.replace(f"${{{var_name}}}", env_value)
+                return value
+            elif isinstance(value, dict):
+                return {k: resolve_env_var(v) for k, v in value.items()}
+            elif isinstance(value, list):
+                return [resolve_env_var(item) for item in value]
+            return value
+
+        config = resolve_env_var(config)
+        embedding_config = config.get("embedding", {})
+        logger.info(f"Loaded embedding config from {config_path}: model={embedding_config.get('model')}")
+
+        return embedding_config
+
+    except Exception as e:
+        logger.error(f"Error loading RAG embedding config: {e}")
+        return {}
 
 
+# ============== Embedding Service (Lightweight Wrapper) ==============
 class EmbeddingService:
-    """Service for generating text embeddings.
+    """Embedding service with configuration loaded from configs/rag/default.yaml.
 
-    Supports two modes:
-    1. Local mode: Calls a local embedding service (e.g., youtu-embedding-2B)
-    2. API mode: Calls an OpenAI-compatible embedding API (e.g., HunyuanEmbedding)
-
-    Usage:
+    Example:
         ```python
-        # Using default config from environment
         service = EmbeddingService()
-
-        # Generate embeddings
-        embeddings = await service.embed(["Hello world", "Another text"])
+        embeddings = await service.embed(["text1", "text2"])
         ```
     """
 
-    def __init__(self, config: EmbeddingConfig | None = None):
-        """Initialize embedding service.
+    def __init__(self, config_name: str = "default"):
+        """Initialize embedding service from RAG config file.
 
         Args:
-            config: Optional configuration. If None, loads from environment.
+            config_name: Config file name (without .yaml extension).
+                        Defaults to "default" which loads configs/rag/default.yaml.
         """
-        self.config = config or EmbeddingConfig.from_env()
         self._embedder: BaseEmbedder | None = None
+        self._config_name = config_name
+        self._backend, self._kwargs = self._load_config()
+
+    def _load_config(self) -> tuple[str, dict[str, Any]]:
+        """Load configuration from RAG config file."""
+        embedding_config = _load_rag_embedding_config(self._config_name)
+
+        if not embedding_config:
+            logger.info("No RAG config found, using environment auto-detection")
+            return "auto", {}
+
+        # Map YAML config fields to create_embedder parameters
+        embedding_type = embedding_config.get("type", "api")
+        backend = "service" if embedding_type == "local" else "openai"
+
+        kwargs = {
+            "model": embedding_config.get("model"),
+            "base_url": embedding_config.get("base_url"),
+            "api_key": embedding_config.get("api_key"),
+            "batch_size": embedding_config.get("batch_size", 16),
+        }
+
+        # For service backend, use service_url instead of base_url
+        if backend == "service":
+            kwargs["service_url"] = kwargs.pop("base_url")
+            kwargs.pop("model", None)
+            kwargs.pop("api_key", None)
+
+        # Filter out None values
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
+        logger.info(f"EmbeddingService config: backend={backend}, config={self._config_name}")
+        return backend, kwargs
 
     @property
     def embedder(self) -> BaseEmbedder:
         """Lazy initialization of embedder."""
         if self._embedder is None:
-            if self.config.embedding_type == "local":
-                logger.info(f"Creating local embedder with URL: {self.config.url}")
-                self._embedder = EmbedderFactory.create(
-                    backend="service",
-                    service_url=self.config.url,
-                    batch_size=self.config.batch_size,
-                )
-            else:
-                logger.info(f"Creating API embedder with URL: {self.config.url}")
-                self._embedder = EmbedderFactory.create(
-                    backend="openai",
-                    model=self.config.model,
-                    base_url=self.config.url,
-                    api_key=self.config.api_key,
-                    batch_size=self.config.batch_size,
-                )
+            self._embedder = create_embedder(self._backend, **self._kwargs)
         return self._embedder
 
-    async def close(self) -> None:
-        """Close the embedder if needed."""
-        # BaseEmbedder doesn't have a close method, so nothing to do
-        pass
-
     async def embed(self, texts: list[str]) -> list[list[float]]:
-        """Generate embeddings for a list of texts.
-
-        Args:
-            texts: List of texts to embed.
-
-        Returns:
-            List of embedding vectors.
-        """
+        """Generate embeddings for a list of texts."""
         if not texts:
             return []
         return await self.embedder.embed_texts(texts)
@@ -123,19 +158,6 @@ class EmbeddingService:
         """Generate embedding for a single text."""
         return await self.embedder.embed_query(text)
 
-    @property
-    def dimension(self) -> int | None:
-        """Get embedding dimension (available after first embed call)."""
-        # Not implemented in base embedder interface
-        return None
-
-    async def __aenter__(self) -> "EmbeddingService":
-        """Async context manager entry."""
-        return self
-
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Async context manager exit."""
-        await self.close()
 
 # ============== Memory Vector Store ==============
 class MemoryVectorStore(BaseVectorStore):

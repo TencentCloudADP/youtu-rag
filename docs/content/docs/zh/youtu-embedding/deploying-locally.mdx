@@ -181,6 +181,9 @@ def embed_query(query: Query):
     embedding_tensor = model_wrapper.encode_queries([text])
     embedding = embedding_tensor.cpu().numpy()
     
+    # For single query, return 1D array by squeezing the batch dimension
+    embedding = embedding.squeeze(0)
+
     rsp = {
         "query": query.query,
         "embedding": base64.b64encode(embedding.tobytes()).decode("ascii"),

@@ -180,6 +180,9 @@ def embed_query(query: Query):
     # Use model's encode_queries logic
     embedding_tensor = model_wrapper.encode_queries([text])
     embedding = embedding_tensor.cpu().numpy()
+        
+    # For single query, return 1D array by squeezing the batch dimension
+    embedding = embedding.squeeze(0)
     
     rsp = {
         "query": query.query,

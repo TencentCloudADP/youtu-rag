@@ -240,7 +240,7 @@ class ChromaVectorStore(BaseVectorStore):
                 content=results["documents"][0],
                 chunk_index=metadata.get("chunk_index", 0),
                 metadata=metadata,
-                embedding=results["embeddings"][0] if results["embeddings"] else None,
+                embedding=results["embeddings"][0] if results["embeddings"] is not None else None,
             )
             return chunk
 

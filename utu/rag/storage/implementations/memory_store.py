@@ -461,7 +461,7 @@ class MemoryVectorStore(BaseVectorStore):
             for i, chunk_id in enumerate(results["ids"]):
                 document = results["documents"][i] if results["documents"] else ""
                 metadata = self._deserialize_metadata(results["metadatas"][i]) if results["metadatas"] else {}
-                embedding = results["embeddings"][i] if results.get("embeddings") else None
+                embedding = results["embeddings"][i] if results.get("embeddings") is not None else None
 
                 chunk = Chunk(
                     id=chunk_id,
@@ -581,7 +581,7 @@ class MemoryVectorStore(BaseVectorStore):
                 content=results["documents"][0] if results["documents"] else "",
                 chunk_index=metadata.get("chunk_index", 0),
                 metadata=metadata,
-                embedding=results["embeddings"][0] if results.get("embeddings") else None,
+                embedding=results["embeddings"][0] if results.get("embeddings") is not None else None,
             )
         return None
 
